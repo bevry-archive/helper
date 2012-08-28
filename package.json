@@ -1,0 +1,32 @@
+{
+  "name": "docpad-helper",
+  "version": "0.1.0",
+  "description": "The remote server helper for DocPad",
+  "homepage": "https://github.com/bevry/docpad-helper",
+  "keywords": [
+    "docpad",
+    "helper"
+  ],
+  "author": "Bevry Pty Ltd <us@bevry.me> (http://bevry.me)",
+  "maintainers": [
+    "Benjamin Lupton <b@lupton.cc> (http://balupton.com)"
+  ],
+  "contributors": [
+    "Benjamin Lupton <b@lupton.cc> (http://balupton.com)"
+  ],
+  "bugs": {
+    "url": "https://github.com/bevry/docpad-helper/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/bevry/docpad-helper.git"
+  },
+  "engines": {
+    "node": "0.8.x",
+    "npm": "1.1.x"
+  },
+  "dependencies": {
+    "createsend": "0.0.2"
+  },
+  "main": "server.js"
+}
