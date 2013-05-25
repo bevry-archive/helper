@@ -1,150 +1,148 @@
 # Require
-url = require("url")
-http = require("http")
-createsend = require("createsend")
+createsend = require('createsend')
+analytics = require('analytics-node')
+extendr = require('extendr')
+connect = require('connect')
+
+# Logging
+logger = new (require('caterpillar').Logger)()
+human  = new (require('caterpillar-human').Human)()
+logger.pipe(human).pipe(process.stdout)
 
 # Don't crash when an error occurs, instead log it
-process.on "uncaughtException", (err) ->
-	console.log(err)
+process.on 'uncaughtException', (err) ->
+	logger.log('err', err.message)
 
 # Config
-CM_API_KEY = undefined
-CM_LIST_ID = undefined
+SEGMENT_SECRET = process.env.SEGMENT_SECRET or null
 CM_API_KEY = process.env.CM_API_KEY or null
 CM_LIST_ID = process.env.CM_LIST_ID or null
+PORT = process.env.PORT or 8000
 
 # Check
-throw new Error("CM_API_KEY is undefined")	unless CM_API_KEY
-throw new Error("CM_LIST_ID is undefined")	unless CM_LIST_ID
+throw new Error('CM_API_KEY is undefined')	unless CM_API_KEY
+throw new Error('CM_LIST_ID is undefined')	unless CM_LIST_ID
+throw new Error('SEGMENT_SECRET is undefined')	unless SEGMENT_SECRET
 
-# Helpers
-cmApi = undefined
-sendResponse = undefined
+# Initialise libraries
+analytics.init({secret:SEGMENT_SECRET})
 cmApi = new createsend(CM_API_KEY)
-sendResponse = (code, data, jsonpCallback, res) ->
-
-	# Prepare
-	str = undefined
-
-	# Send code
-	res.writeHead code
-
-	# Send response
-	if jsonpCallback
-		str = jsonpCallback + "(" + JSON.stringify(data) + ")"
-	else
-		str = JSON.stringify(data)
-	res.write str
-
-	# Log
-	console.log "Sending response:", str
-
-	# Flush
-	res.end()
-
+app = connect()
 
 # Create our server
-server = undefined
-server = http.createServer((req, res) ->
-
-	# Prepare
-	responseCode = undefined
-	responseData = undefined
-
-	# Set CORS headers
-	res.setHeader "Access-Control-Allow-Origin", "*"
-	res.setHeader "Access-Control-Request-Method", "*"
-	res.setHeader "Access-Control-Allow-Methods", "OPTIONS, GET"
-	res.setHeader "Access-Control-Allow-Headers", "*"
-	if req.method is "OPTIONS"
-		res.writeHead 200
+app.use connect.query()
+app.use connect.bodyParser()
+app.use (req, res) ->
+	# CORS
+	res.setHeader('Access-Control-Allow-Origin', '*')
+	res.setHeader('Access-Control-Request-Method', '*')
+	res.setHeader('Access-Control-Allow-Methods', 'OPTIONS, GET')
+	res.setHeader('Access-Control-Allow-Headers', '*')
+	if req.method is 'OPTIONS'
+		res.writeHead(200)
 		res.end()
 		return
 
-	# Get the params
-	query = undefined
-	jsonpCallback = undefined
-	query = url.parse(req.url, true).query
-	jsonpCallback = query.callback
+	# Send Response Helper
+	sendResponse = (data,code=200) ->
+		# Prepare
+		str = null
+
+		# Send code
+		res.writeHead(code)
+
+		# Prepare response
+		if req.query.callback
+			str = req.query.callback + '(' + JSON.stringify(data) + ')'
+		else
+			str = JSON.stringify(data)
+
+		# Log
+		level = if code is 200 then 'info' else 'warning'
+		logger.log(level, "#{code} response:", str)
+
+		# Flush
+		res.write(str)
+		res.end()
+
+	# Send Error Helper
+	sendError = (message,data={},responseCode=400) ->
+		# Prepare error
+		responseData = extendr.extend({
+			success: false
+			error: message
+		},data)
+
+		# Send error
+		return sendResponse(responseData, responseCode)
+
+	# Send Success Helper
+	sendSuccess = (data={},code=200) ->
+		# Prepare error
+		responseData = extendr.extend({
+			success: true
+		},data)
+
+		# Send response
+		return sendResponse(responseData, responseCode)
 
 	# Log
-	console.log "Received request:", req.url
+	logger.log('info', 'received request:', req.url, req.query, req.body)
 
 	# Check for correct params
-	unless query.method
-
-		# Send error
-		responseCode = 400 # bad request
-		responseData =
-			success: false
-			error: "missing method"
-
-		sendResponse responseCode, responseData, jsonpCallback, res
-
-		# Done
-		return
+	return sendError('missing method')  unless req.query.method
 
 	# Add Subscriber
-	if query.method is "add-subscriber"
-
+	switch req.query.method
 		# Create the subscriber
-		subscriberData = undefined
-		subscriberData =
-			EmailAddress: query.email
-			Name: query.name
-			Resubscribe: true
-			CustomFields: [
-				Key: "username"
-				Value: query.username
-			]
+		when 'add-subscriber'
+			# Prepare data
+			subscriberData =
+				EmailAddress: req.query.email
+				Name: req.query.name
+				Resubscribe: true
+				CustomFields: [
+					Key: 'username'
+					Value: req.query.username
+				]
 
+			# Subscribe to the list
+			cmApi.subscriberAdd CM_LIST_ID, subscriberData, (err, email) ->
+				# Error
+				return sendError(err.message, {email})  if err
 
-		# Subscribe to the list
-		cmApi.subscriberAdd CM_LIST_ID, subscriberData, (err, email) ->
+				# Send response back to client
+				return sendSuccess({email})
 
-			# Prepare response
-			responseCode = undefined
-			responseData = undefined
-			if err
-				console.log err
-				responseCode = 400 # bad request
-				responseData =
-					success: false
-					error: err.message
-					email: email
-			else
-				responseCode = 200 # okay
-				responseData =
-					success: true
-					email: email
+		# Analytics
+		when 'analytics'
+			# Check body
+			return sendError('missing body', req.body)  if Object.keys(req.body).length is 0
+
+			# Check user
+			if req.body.userId in ['55c7a10d69feeae52b991ba69e820c29aa1da960']
+				return sendError('spam user')
+
+			# Action
+			switch req.query.action
+				when 'identify'
+					analytics.identify(req.body)
+				when 'track'
+					analytics.track(req.body)
+				else
+					return sendError('unknown action')
 
 			# Send response back to client
-			sendResponse responseCode, responseData, jsonpCallback, res
+			return sendSuccess()
 
+		# Unknown method
+		else
+			return sendError('unknown method')
 
-		# Done
-		return
-
-	# Unknown Method
-	else
-
-		# Send error
-		responseCode = 400 # bad request
-		responseData =
-			success: false
-			error: "unknown method"
-
-		sendResponse responseCode, responseData, jsonpCallback, res
-
-		# Done
-		return
-)
 
 # Start our server
-server.listen process.env.PORT or 8000, ->
-	address = server.address()
-	console.log "opened server on %j", address
-
+app.listen PORT, ->
+	logger.log('info', 'opened server on', PORT)
 
 # Export
-module.exports = server
+module.exports = app

@@ -1,24 +1,28 @@
 {
-  "name": "cloud-api",
-  "version": "0.1.0",
-  "private": true,
-  "author": "Bevry Pty Ltd <us@bevry.me> (http://bevry.me)",
-  "maintainers": [
-    "Benjamin Lupton <b@lupton.cc> (http://balupton.com)"
-  ],
-  "contributors": [
-    "Benjamin Lupton <b@lupton.cc> (http://balupton.com)"
-  ],
-  "engines": {
-    "node": "0.8.x",
-    "npm": "1.1.x"
-  },
-  "dependencies": {
-    "bal-util": "1.13.x",
-    "createsend": "0.0.2"
-  },
-  "devDependencies": {
-    "coffee-script": "1.3.x"
-  },
-  "main": "app.js"
+	"name": "docpad-helper",
+	"version": "0.2.0",
+	"private": true,
+	"author": "Bevry Pty Ltd <us@bevry.me> (http://bevry.me)",
+	"maintainers": [
+		"Benjamin Lupton <b@lupton.cc> (http://balupton.com)"
+	],
+	"contributors": [
+		"Benjamin Lupton <b@lupton.cc> (http://balupton.com)"
+	],
+	"engines": {
+		"node": "0.10",
+		"npm": "1.2"
+	},
+	"dependencies": {
+		"analytics-node": "~0.5.0",
+		"createsend": "~0.0.2",
+		"connect": "~2.7.10",
+		"extendr": "~2.0.1",
+		"caterpillar": "~2.0.3",
+		"caterpillar-human": "~2.1.0"
+	},
+	"devDependencies": {
+		"coffee-script": "~1.6.2"
+	},
+	"main": "app.js"
 }

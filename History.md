@@ -1,5 +1,9 @@
 ## History
 
+- v0.2.0 May 25, 2013
+	- Now also handles statistics
+	- Rewrote to use connect and caterpillar
+
 - v0.1.1 August 28, 2012
 	- Fixed Procfile
 
