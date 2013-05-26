@@ -1,1 +1,1 @@
-require(__dirname+'/out/app');
+require('./out/app');
