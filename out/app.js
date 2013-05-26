@@ -49,6 +49,14 @@ app = connect();
 
 app.use(connect.query());
 
+app.use(connect.json());
+
+app.use(connect.compress());
+
+app.use(connect.timeout());
+
+app.use(connect.limit('200kb'));
+
 app.use(connect.bodyParser());
 
 app.use(function(req, res) {
@@ -70,7 +78,9 @@ app.use(function(req, res) {
       code = 200;
     }
     str = null;
-    res.writeHead(code);
+    res.writeHead(code, {
+      'Content-Type': 'application/json'
+    });
     if (req.query.callback) {
       str = req.query.callback + '(' + JSON.stringify(data) + ')';
     } else {
@@ -81,20 +91,20 @@ app.use(function(req, res) {
     res.write(str);
     return res.end();
   };
-  sendError = function(message, data, responseCode) {
+  sendError = function(message, data, code) {
     var responseData;
 
     if (data == null) {
       data = {};
     }
-    if (responseCode == null) {
-      responseCode = 400;
+    if (code == null) {
+      code = 400;
     }
     responseData = extendr.extend({
       success: false,
       error: message
     }, data);
-    return sendResponse(responseData, responseCode);
+    return sendResponse(responseData, code);
   };
   sendSuccess = function(data, code) {
     var responseData;
@@ -108,7 +118,7 @@ app.use(function(req, res) {
     responseData = extendr.extend({
       success: true
     }, data);
-    return sendResponse(responseData, responseCode);
+    return sendResponse(responseData, code);
   };
   logger.log('info', 'received request:', req.url, req.query, req.body);
   if (!req.query.method) {
@@ -117,13 +127,13 @@ app.use(function(req, res) {
   switch (req.query.method) {
     case 'add-subscriber':
       subscriberData = {
-        EmailAddress: req.query.email,
-        Name: req.query.name,
+        EmailAddress: req.query.email || req.body.email,
+        Name: req.query.name || req.body.name,
         Resubscribe: true,
         CustomFields: [
           {
             Key: 'username',
-            Value: req.query.username
+            Value: req.query.username || req.body.username
           }
         ]
       };

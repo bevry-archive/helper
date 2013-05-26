@@ -31,6 +31,10 @@ app = connect()
 
 # Create our server
 app.use connect.query()
+app.use connect.json()
+app.use connect.compress()
+app.use connect.timeout()
+app.use connect.limit('200kb')
 app.use connect.bodyParser()
 app.use (req, res) ->
 	# CORS
@@ -49,7 +53,9 @@ app.use (req, res) ->
 		str = null
 
 		# Send code
-		res.writeHead(code)
+		res.writeHead(code, {
+			'Content-Type': 'application/json'
+		})
 
 		# Prepare response
 		if req.query.callback
@@ -66,7 +72,7 @@ app.use (req, res) ->
 		res.end()
 
 	# Send Error Helper
-	sendError = (message,data={},responseCode=400) ->
+	sendError = (message,data={},code=400) ->
 		# Prepare error
 		responseData = extendr.extend({
 			success: false
@@ -74,7 +80,7 @@ app.use (req, res) ->
 		},data)
 
 		# Send error
-		return sendResponse(responseData, responseCode)
+		return sendResponse(responseData, code)
 
 	# Send Success Helper
 	sendSuccess = (data={},code=200) ->
@@ -84,7 +90,7 @@ app.use (req, res) ->
 		},data)
 
 		# Send response
-		return sendResponse(responseData, responseCode)
+		return sendResponse(responseData, code)
 
 	# Log
 	logger.log('info', 'received request:', req.url, req.query, req.body)
@@ -98,12 +104,12 @@ app.use (req, res) ->
 		when 'add-subscriber'
 			# Prepare data
 			subscriberData =
-				EmailAddress: req.query.email
-				Name: req.query.name
+				EmailAddress: req.query.email or req.body.email
+				Name: req.query.name or req.body.name
 				Resubscribe: true
 				CustomFields: [
 					Key: 'username'
-					Value: req.query.username
+					Value: req.query.username or req.body.username
 				]
 
 			# Subscribe to the list
