@@ -32,12 +32,11 @@ cmApi = new createsend(CM_API_KEY)
 app = connect()
 
 # Create our server
+app.use connect.limit('200kb')
+app.use connect.timeout()
+app.use connect.compress()
 app.use connect.query()
 app.use connect.json()
-app.use connect.compress()
-app.use connect.timeout()
-app.use connect.limit('200kb')
-app.use connect.bodyParser()
 app.use (req, res) ->
 	# CORS
 	res.setHeader('Access-Control-Allow-Origin', '*')

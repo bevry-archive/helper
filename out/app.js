@@ -15,6 +15,10 @@ human = new (require('caterpillar-human').Human)();
 
 logger.pipe(human).pipe(process.stdout);
 
+analytics.on('error', function(err) {
+  return logger.log('err', err.message);
+});
+
 process.on('uncaughtException', function(err) {
   return logger.log('err', err.message);
 });
@@ -47,17 +51,15 @@ cmApi = new createsend(CM_API_KEY);
 
 app = connect();
 
-app.use(connect.query());
-
-app.use(connect.json());
-
-app.use(connect.compress());
+app.use(connect.limit('200kb'));
 
 app.use(connect.timeout());
 
-app.use(connect.limit('200kb'));
+app.use(connect.compress());
 
-app.use(connect.bodyParser());
+app.use(connect.query());
+
+app.use(connect.json());
 
 app.use(function(req, res) {
   var sendError, sendResponse, sendSuccess, subscriberData, _ref;
