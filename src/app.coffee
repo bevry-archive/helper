@@ -10,6 +10,8 @@ human  = new (require('caterpillar-human').Human)()
 logger.pipe(human).pipe(process.stdout)
 
 # Don't crash when an error occurs, instead log it
+analytics.on 'error', (err) ->
+	logger.log('err', err.message)
 process.on 'uncaughtException', (err) ->
 	logger.log('err', err.message)
 
