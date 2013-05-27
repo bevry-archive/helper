@@ -124,7 +124,6 @@ app.use (req, res) ->
 		# Analytics
 		when 'analytics'
 			# Check body
-			console.log req
 			return sendError('missing body', req.body)  if Object.keys(req.body).length is 0
 
 			# Check user
