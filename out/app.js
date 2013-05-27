@@ -150,6 +150,7 @@ app.use(function(req, res) {
         });
       });
     case 'analytics':
+      console.log(req);
       if (Object.keys(req.body).length === 0) {
         return sendError('missing body', req.body);
       }
