@@ -128,6 +128,8 @@ app.use(function(req, res) {
     return sendError('missing method');
   }
   switch (req.query.method) {
+    case 'ping':
+      return sendSuccess();
     case 'add-subscriber':
       subscriberData = {
         EmailAddress: req.query.email || req.body.email,

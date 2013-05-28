@@ -37,7 +37,7 @@ app.use connect.timeout()
 app.use connect.compress()
 app.use connect.query()
 app.use connect.json()
-app.use (req, res) ->
+app.use (req,res) ->
 	# Prepare
 	ipAddress = req.headers['X-Forwarded-For'] or req.connection.remoteAddress
 
@@ -104,6 +104,10 @@ app.use (req, res) ->
 
 	# Add Subscriber
 	switch req.query.method
+		# Ping
+		when 'ping'
+			return sendSuccess()
+
 		# Create the subscriber
 		when 'add-subscriber'
 			# Prepare data
