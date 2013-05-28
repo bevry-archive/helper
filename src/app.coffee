@@ -38,6 +38,9 @@ app.use connect.compress()
 app.use connect.query()
 app.use connect.json()
 app.use (req, res) ->
+	# Prepare
+	ipAddress = req.headers['X-Forwarded-For'] or req.connection.remoteAddress
+
 	# CORS
 	res.setHeader('Access-Control-Allow-Origin', '*')
 	res.setHeader('Access-Control-Request-Method', '*')
@@ -129,6 +132,10 @@ app.use (req, res) ->
 			# Check user
 			if req.body.userId in ['55c7a10d69feeae52b991ba69e820c29aa1da960']
 				return sendError('spam user')
+
+			# Adjust params
+			req.body.context or= {}
+			req.body.context.ip or= ipAddress
 
 			# Action
 			switch req.query.action

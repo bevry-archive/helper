@@ -62,8 +62,9 @@ app.use(connect.query());
 app.use(connect.json());
 
 app.use(function(req, res) {
-  var sendError, sendResponse, sendSuccess, subscriberData, _ref;
+  var ipAddress, sendError, sendResponse, sendSuccess, subscriberData, _base, _base1, _ref;
 
+  ipAddress = req.headers['X-Forwarded-For'] || req.connection.remoteAddress;
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Request-Method', '*');
   res.setHeader('Access-Control-Allow-Methods', 'OPTIONS, GET');
@@ -156,6 +157,8 @@ app.use(function(req, res) {
       if ((_ref = req.body.userId) === '55c7a10d69feeae52b991ba69e820c29aa1da960') {
         return sendError('spam user');
       }
+      (_base = req.body).context || (_base.context = {});
+      (_base1 = req.body.context).ip || (_base1.ip = ipAddress);
       switch (req.query.action) {
         case 'identify':
           analytics.identify(req.body);
