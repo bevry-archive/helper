@@ -9,6 +9,13 @@
 	"contributors": [
 		"Benjamin Lupton <b@lupton.cc> (http://balupton.com)"
 	],
+	"bugs": {
+		"url": "https://github.com/bevry/docpad-helper/issues"
+	},
+	"repository" : {
+		"type": "git",
+		"url": "https://github.com/bevry/docpad-helper.git"
+	},
 	"engines": {
 		"node": "0.10",
 		"npm": "1.2"
