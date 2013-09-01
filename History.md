@@ -1,5 +1,9 @@
 ## History
 
+- v0.2.1 September 2, 2013
+	- Updated spam users
+	- Updated dependencies
+
 - v0.2.0 May 25, 2013
 	- Now also handles statistics
 	- Rewrote to use connect and caterpillar
