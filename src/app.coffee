@@ -20,6 +20,10 @@ SEGMENT_SECRET = process.env.SEGMENT_SECRET or null
 CM_API_KEY = process.env.CM_API_KEY or null
 CM_LIST_ID = process.env.CM_LIST_ID or null
 PORT = process.env.PORT or 8000
+spamUsers = [
+	'55c7a10d69feeae52b991ba69e820c29aa1da960'
+	'ef87bc3cbb56a7d48e8a5024f9f33706b8146591'
+]
 
 # Check
 throw new Error('CM_API_KEY is undefined')	unless CM_API_KEY
@@ -134,7 +138,7 @@ app.use (req,res) ->
 			return sendError('missing body', req.body)  if Object.keys(req.body).length is 0
 
 			# Check user
-			if req.body.userId in ['55c7a10d69feeae52b991ba69e820c29aa1da960']
+			if req.body.userId in spamUsers
 				return sendError('spam user')
 
 			# Adjust params

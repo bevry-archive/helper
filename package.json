@@ -23,8 +23,8 @@
 	"dependencies": {
 		"analytics-node": "~0.5.0",
 		"createsend": "~0.0.2",
-		"connect": "~2.7.10",
-		"extendr": "~2.0.1",
+		"connect": "~2.8.7",
+		"extendr": "~2.1.0",
 		"caterpillar": "~2.0.3",
 		"caterpillar-human": "~2.1.0"
 	},
