@@ -1,5 +1,9 @@
 ## History
 
+- v0.3.0 September 17, 2013
+	- Added support and better logging for undefined users
+	- Updated dependencies
+
 - v0.2.1 September 2, 2013
 	- Updated spam users
 	- Updated dependencies

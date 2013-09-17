@@ -1,5 +1,5 @@
 # Require
-createsend = require('createsend')
+CreateSend = require('createsend')
 analytics = require('analytics-node')
 extendr = require('extendr')
 connect = require('connect')
@@ -32,7 +32,7 @@ throw new Error('SEGMENT_SECRET is undefined')	unless SEGMENT_SECRET
 
 # Initialise libraries
 analytics.init({secret:SEGMENT_SECRET})
-cmApi = new createsend(CM_API_KEY)
+createSend = new CreateSend(apiKey: CM_API_KEY)
 app = connect()
 
 # Create our server
@@ -117,15 +117,15 @@ app.use (req,res) ->
 			# Prepare data
 			subscriberData =
 				EmailAddress: req.query.email or req.body.email
-				Name: req.query.name or req.body.name
+				Name: req.query.name or req.body.name or null
 				Resubscribe: true
 				CustomFields: [
 					Key: 'username'
-					Value: req.query.username or req.body.username
+					Value: req.query.username or req.body.username or null
 				]
 
 			# Subscribe to the list
-			cmApi.subscriberAdd CM_LIST_ID, subscriberData, (err, email) ->
+			createSend.subscribers.addSubscriber CM_LIST_ID, subscriberData, (err, email) ->
 				# Error
 				return sendError(err.message, {email})  if err
 
@@ -137,8 +137,13 @@ app.use (req,res) ->
 			# Check body
 			return sendError('missing body', req.body)  if Object.keys(req.body).length is 0
 
+			# No user
+			unless req.body.userId
+				req.body.userId = 'undefined'
+				logger.log('warn', 'no user on track:', req.url, req.query, req.body)
+
 			# Check user
-			if req.body.userId in spamUsers
+			else if req.body.userId in spamUsers
 				return sendError('spam user')
 
 			# Adjust params
