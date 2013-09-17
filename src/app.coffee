@@ -1,5 +1,5 @@
 # Require
-CreateSend = require('createsend')
+CreateSend = require('createsend-node')
 analytics = require('analytics-node')
 extendr = require('extendr')
 connect = require('connect')
