@@ -2,7 +2,7 @@
 var CM_API_KEY, CM_LIST_ID, CreateSend, PORT, SEGMENT_SECRET, analytics, app, connect, createSend, extendr, human, logger, spamUsers,
   __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
-CreateSend = require('createsend');
+CreateSend = require('createsend-node');
 
 analytics = require('analytics-node');
 
