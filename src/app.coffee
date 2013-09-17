@@ -11,9 +11,9 @@ logger.pipe(human).pipe(process.stdout)
 
 # Don't crash when an error occurs, instead log it
 analytics.on 'error', (err) ->
-	logger.log('err', err.message)
+	logger.log('err', err.message, err.stack)
 process.on 'uncaughtException', (err) ->
-	logger.log('err', err.message)
+	logger.log('err', err.message, err.stacks)
 
 # Config
 SEGMENT_SECRET = process.env.SEGMENT_SECRET or null
@@ -85,7 +85,7 @@ app.use (req,res) ->
 		responseData = extendr.extend({
 			success: false
 			error: message
-		},data)
+		}, data)
 
 		# Send error
 		return sendResponse(responseData, code)
@@ -95,7 +95,7 @@ app.use (req,res) ->
 		# Prepare error
 		responseData = extendr.extend({
 			success: true
-		},data)
+		}, data)
 
 		# Send response
 		return sendResponse(responseData, code)
@@ -125,8 +125,9 @@ app.use (req,res) ->
 				]
 
 			# Subscribe to the list
-			createSend.subscribers.addSubscriber CM_LIST_ID, subscriberData, (err, email) ->
+			createSend.subscribers.addSubscriber CM_LIST_ID, subscriberData, (err, subscriber) ->
 				# Error
+				email = subscriber?.emailAddress or null
 				return sendError(err.message, {email})  if err
 
 				# Send response back to client

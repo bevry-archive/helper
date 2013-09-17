@@ -17,11 +17,11 @@ human = new (require('caterpillar-human').Human)();
 logger.pipe(human).pipe(process.stdout);
 
 analytics.on('error', function(err) {
-  return logger.log('err', err.message);
+  return logger.log('err', err.message, err.stack);
 });
 
 process.on('uncaughtException', function(err) {
-  return logger.log('err', err.message);
+  return logger.log('err', err.message, err.stacks);
 });
 
 SEGMENT_SECRET = process.env.SEGMENT_SECRET || null;
@@ -143,7 +143,9 @@ app.use(function(req, res) {
           }
         ]
       };
-      return createSend.subscribers.addSubscriber(CM_LIST_ID, subscriberData, function(err, email) {
+      return createSend.subscribers.addSubscriber(CM_LIST_ID, subscriberData, function(err, subscriber) {
+        var email;
+        email = (subscriber != null ? subscriber.emailAddress : void 0) || null;
         if (err) {
           return sendError(err.message, {
             email: email

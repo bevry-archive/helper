@@ -1,5 +1,9 @@
 ## History
 
+- v0.3.1 September 17, 2013
+	- Better error logging
+	- Fixed add subscriber response
+
 - v0.3.0 September 17, 2013
 	- Added support and better logging for undefined users
 	- Updated dependencies
