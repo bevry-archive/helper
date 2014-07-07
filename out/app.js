@@ -50,7 +50,9 @@
   app = connect();
 
   logError = function(err) {
-    return logger.log('err', err.stack || err.message || err);
+    if (err) {
+      return logger.log('err', err.stack || err.message || err);
+    }
   };
 
   process.on('uncaughtException', logError);

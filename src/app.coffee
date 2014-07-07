@@ -32,7 +32,7 @@ app = connect()
 
 # Don't crash when an error occurs, instead log it
 logError = (err) ->
-	logger.log('err', err.stack or err.message or err)
+	logger.log('err', err.stack or err.message or err)  if err
 process.on('uncaughtException', logError)
 
 # Create our server
