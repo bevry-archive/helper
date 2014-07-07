@@ -31,8 +31,6 @@ createSend = new CreateSend(apiKey: CM_API_KEY)
 app = connect()
 
 # Don't crash when an error occurs, instead log it
-analytics.on 'error', (err) ->
-	logger.log('err', err.message, err.stack)
 process.on 'uncaughtException', (err) ->
 	logger.log('err', err.message, err.stacks)
 
