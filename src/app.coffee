@@ -31,8 +31,9 @@ createSend = new CreateSend(apiKey: CM_API_KEY)
 app = connect()
 
 # Don't crash when an error occurs, instead log it
-process.on 'uncaughtException', (err) ->
-	logger.log('err', err.message, err.stacks)
+logError = (err) ->
+	logger.log('err', err.stack or err.message or err)
+process.on('uncaughtException', logError)
 
 # Create our server
 app.use connect.limit('200kb')
@@ -156,9 +157,9 @@ app.use (req,res) ->
 			# Action
 			switch req.query.action
 				when 'identify'
-					analytics.identify(req.body)
+					analytics.identify(req.body, logError)
 				when 'track'
-					analytics.track(req.body)
+					analytics.track(req.body, logError)
 				else
 					return sendError('unknown action')
 
