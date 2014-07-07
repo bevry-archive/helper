@@ -1,19 +1,14 @@
 # Require
 CreateSend = require('createsend-node')
-analytics = require('analytics-node')
+Analytics = require('analytics-node')
 extendr = require('extendr')
 connect = require('connect')
+util = require('util')
 
 # Logging
 logger = new (require('caterpillar').Logger)()
 human  = new (require('caterpillar-human').Human)()
 logger.pipe(human).pipe(process.stdout)
-
-# Don't crash when an error occurs, instead log it
-analytics.on 'error', (err) ->
-	logger.log('err', err.message, err.stack)
-process.on 'uncaughtException', (err) ->
-	logger.log('err', err.message, err.stacks)
 
 # Config
 SEGMENT_SECRET = process.env.SEGMENT_SECRET or null
@@ -31,9 +26,15 @@ throw new Error('CM_LIST_ID is undefined')	unless CM_LIST_ID
 throw new Error('SEGMENT_SECRET is undefined')	unless SEGMENT_SECRET
 
 # Initialise libraries
-analytics.init({secret:SEGMENT_SECRET})
+analytics = new Analytics(SEGMENT_SECRET)
 createSend = new CreateSend(apiKey: CM_API_KEY)
 app = connect()
+
+# Don't crash when an error occurs, instead log it
+analytics.on 'error', (err) ->
+	logger.log('err', err.message, err.stack)
+process.on 'uncaughtException', (err) ->
+	logger.log('err', err.message, err.stacks)
 
 # Create our server
 app.use connect.limit('200kb')
@@ -150,6 +151,9 @@ app.use (req,res) ->
 			# Adjust params
 			req.body.context or= {}
 			req.body.context.ip or= ipAddress
+
+			# Log
+			console.log 'analytics:', req.query.action, '\n', util.inspect(req.body), '\n'
 
 			# Action
 			switch req.query.action
