@@ -29,6 +29,12 @@ module.exports = require('helper-service').start({
 		ipAddress = req.headers['X-Forwarded-For'] or req.connection.remoteAddress
 		{logger, sendResponse, sendError, sendSuccess} = req
 
+		# Log a possible error
+		logError = (err) ->
+			if err
+				logger.log('err', err.stack or err.message or err)
+			return
+
 		# Log
 		logger.log('info', 'received request:', req.url, req.query, req.body)
 
