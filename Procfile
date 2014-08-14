@@ -1,1 +1,1 @@
-web: npm install && ./node_modules/.bin/cake compile && npm start
+web: npm install && npm run-script compile && npm start

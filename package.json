@@ -54,6 +54,7 @@
     "lib": "./out"
   },
   "scripts": {
+    "compile": "node ./node_modules/.bin/cake compile",
     "start": "node ./out/app.js"
   },
   "main": "./out/app.js",
