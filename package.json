@@ -1,7 +1,7 @@
 {
   "title": "DocPad Helper Service",
   "name": "docpad-helper-service",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Helper server for DocPad, used for tracking events and performing newsletter subscriptions",
   "homepage": "https://github.com/docpad/helper",
   "keywords": [

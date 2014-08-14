@@ -1,5 +1,10 @@
 ## History
 
+## v1.0.1 August 14, 2014
+
+- Fixed readme
+
+
 ## v1.0.0 August 14, 2014
 
 - Abstracted out most of the functionality into [bevry/helper-service](https://github.com/bevry/helper-service)
