@@ -1,7 +1,7 @@
 {
   "title": "DocPad Helper Service",
   "name": "docpad-helper-service",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Helper server for DocPad, used for tracking events and performing newsletter subscriptions",
   "homepage": "https://github.com/docpad/helper",
   "keywords": [
@@ -15,9 +15,10 @@
   "badges": {
     "travis": true,
     "npm": true,
+    "npmdownloads": true,
     "david": true,
     "daviddev": true,
-    "gittip": "docpad",
+    "gratipay": "bevry",
     "flattr": "344188/balupton-on-Flattr",
     "paypal": "QB8GQPZAH84N6",
     "bitcoin": "https://coinbase.com/checkouts/9ef59f5479eec1d97d63382c9ebcb93a",
@@ -28,7 +29,7 @@
     "Benjamin Lupton <b@lupton.cc> (https://github.com/balupton)"
   ],
   "contributors": [
-    "balupton (https://github.com/balupton)",
+    "Benjamin Lupton <b@lupton.cc> (https://github.com/balupton)",
     "Zearin (https://github.com/Zearin)"
   ],
   "bugs": {
@@ -42,13 +43,13 @@
     "node": ">=0.4"
   },
   "dependencies": {
-    "analytics-node": "~1.0.0",
+    "analytics-node": "~1.1.1",
     "createsend-node": "~0.7.0",
     "helper-service": "~1.0.0"
   },
   "devDependencies": {
-    "coffee-script": "~1.7.1",
-    "projectz": "^0.3.15"
+    "coffee-script": "^1.9.0",
+    "projectz": "^0.3.17"
   },
   "directories": {
     "lib": "./out"

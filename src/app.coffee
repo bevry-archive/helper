@@ -20,6 +20,7 @@ createSend = new CreateSend(apiKey: CM_API_KEY)
 spamUsers = [
 	'55c7a10d69feeae52b991ba69e820c29aa1da960'
 	'ef87bc3cbb56a7d48e8a5024f9f33706b8146591'
+	'c0f96be80fa06706ad261a7d932cfd188041aae3'
 ]
 
 # Create our middleware
