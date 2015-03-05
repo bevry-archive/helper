@@ -1,1 +1,1 @@
-web: rm -Rf node_modules && npm install && npm install coffee-script && npm run-script compile && npm start
+web: rm -Rf node_modules && npm install && npm run-script compile && npm start
