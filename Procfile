@@ -1,1 +1,1 @@
-web: npm config set production false && npm install && npm run-script compile && npm start
+web: npm run-script compile && npm start
