@@ -1,1 +1,1 @@
-web: npm install && npm install coffee-script && npm run-script compile && npm start
+web: npm config set production false && npm install && npm run-script compile && npm start
