@@ -1,7 +1,11 @@
 ## History
 
+## v1.0.3 March 5, 2015
+- Added new spam users
+- Updated dependencies
+
 ## v1.0.2 February 7, 2015
-- Updated deps
+- Updated dependencies
 - Added new spam user that has been generating 45,000 requests a day for the last 2 weeks
 
 
