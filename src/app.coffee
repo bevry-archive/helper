@@ -60,17 +60,24 @@ module.exports = require('helper-service').start({
 				# Exchange
 				when 'exchange'
 					version = (req.query.version or '')
-					if semver.satisfies(version, '5.3')
-						branch = 'docpad-5.3.x'
-						extension = 'json'
-					else if semver.satisfies(version, '5')
-						branch = 'docpad-5.x'
-						extension = 'json'
+					if semver.satisfies(version, '5')
+						if semver.satisfies(version, '5.3')
+							branch = 'docpad-5.3.x'
+							extension = 'json'
+						else
+							branch = 'docpad-5.x'
+							extension = 'json'
+					else if semver.satisfies(version, '6')
+						if semver.satisfies(version, '<6.73.6')
+							branch = '4c4605558e551be8dc35775e48424ecb06f625fd'
+							extension = 'json'
+						else
+							branch = 'docpad-6.x'
+							extension = 'cson'
 					else
-						branch = 'docpad-6.x'
-						extension = 'cson'
-					url = "https://raw.githubusercontent.com/bevry/docpad-extras/#{branch}/exchange.#{extension}"
+						return sendError('Unknown DocPad version', {version})
 
+					url = "https://raw.githubusercontent.com/bevry/docpad-extras/#{branch}/exchange.#{extension}"
 					res.writeHead(codeRedirectPermanent, {'Location':url})
 					res.end()
 
