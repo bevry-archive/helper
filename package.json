@@ -1,7 +1,7 @@
 {
   "title": "DocPad Helper Service",
   "name": "docpad-helper-service",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Helper server for DocPad, used for tracking events and performing newsletter subscriptions",
   "homepage": "https://github.com/docpad/helper",
   "keywords": [
@@ -44,9 +44,10 @@
   },
   "dependencies": {
     "analytics-node": "^1.2.0",
+    "coffee-script": "^1.9.1",
     "createsend-node": "^0.7.0",
     "helper-service": "^1.0.0",
-    "coffee-script": "^1.9.1"
+    "semver": "^4.3.1"
   },
   "devDependencies": {
     "projectz": "^0.5.0"

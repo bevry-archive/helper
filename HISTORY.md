@@ -1,5 +1,8 @@
 ## History
 
+## v1.0.4 March 14, 2015
+- Moved exchange and latest requests form docpad site to here
+
 ## v1.0.3 March 5, 2015
 - Added new spam users
 - Updated dependencies
