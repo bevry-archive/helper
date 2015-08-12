@@ -54,13 +54,10 @@
     "projectz": "^0.5.0"
   },
   "directories": {
-    "lib": "./out"
+    "lib": "./lib"
   },
   "scripts": {
     "start": "iojs --harmony ./lib/app.js"
   },
-  "main": "./out/app.js",
-  "cakeConfiguration": {
-    "COFFEE_SRC_PATH": "src"
-  }
+  "main": "./lib/app.js"
 }
