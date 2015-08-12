@@ -57,7 +57,8 @@
     "lib": "./lib"
   },
   "scripts": {
-    "start": "iojs --harmony ./lib/app.js"
+    "server": "iojs --harmony ./lib/app.js",
+    "start": "npm install && npm run-script server"
   },
   "main": "./lib/app.js"
 }
