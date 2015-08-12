@@ -41,7 +41,7 @@
     "url": "http://github.com/docpad/helper.git"
   },
   "engines": {
-    "node": ">=0.4"
+    "iojs": "^3.0.0"
   },
   "dependencies": {
     "analytics-node": "^1.2.0",
