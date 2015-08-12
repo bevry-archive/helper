@@ -1,1 +1,1 @@
-web: npm run-script compile && npm start
+web: npm start

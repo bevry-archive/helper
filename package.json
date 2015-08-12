@@ -57,8 +57,9 @@
     "lib": "./out"
   },
   "scripts": {
-    "compile": "node ./node_modules/.bin/cake compile",
-    "start": "node ./out/app.js"
+    "compile": "./node_modules/.bin/cake compile",
+    "server": "node ./out/app.js",
+    "start": "npm run-script compile && npm run-script server"
   },
   "main": "./out/app.js",
   "cakeConfiguration": {
