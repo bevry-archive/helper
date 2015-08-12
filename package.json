@@ -45,21 +45,19 @@
   },
   "dependencies": {
     "analytics-node": "^1.2.0",
-    "coffee-script": "^1.9.1",
     "createsend-node": "^0.7.0",
     "helper-service": "^1.0.0",
     "semver": "^4.3.1"
   },
   "devDependencies": {
+    "coffee-script": "^1.9.1",
     "projectz": "^0.5.0"
   },
   "directories": {
     "lib": "./out"
   },
   "scripts": {
-    "compile": "./node_modules/.bin/cake compile",
-    "server": "node ./out/app.js",
-    "start": "npm run-script compile && npm run-script server"
+    "start": "iojs --harmony ./lib/app.js"
   },
   "main": "./out/app.js",
   "cakeConfiguration": {
