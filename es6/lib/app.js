@@ -1,4 +1,4 @@
-"use strict"
+'use strict'
 
 // Require
 const CreateSend = require('createsend-node')
