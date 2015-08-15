@@ -1,3 +1,5 @@
+"use strict"
+
 // Require
 const CreateSend = require('createsend-node')
 const Analytics = require('analytics-node')
