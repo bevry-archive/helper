@@ -1,5 +1,3 @@
-"use strict"
-
 // Require
 const CreateSend = require('createsend-node')
 const Analytics = require('analytics-node')
@@ -10,7 +8,7 @@ const SEGMENT_SECRET = process.env.SEGMENT_SECRET || null
 const CM_API_KEY = process.env.CM_API_KEY || null
 const CM_LIST_ID = process.env.CM_LIST_ID || null
 const codeRedirectPermanent = 301
-const codeRedirectTemporary = 302
+// const codeRedirectTemporary = 302
 
 // Check
 if ( !CM_API_KEY )  throw new Error('CM_API_KEY is undefined')
@@ -34,20 +32,17 @@ const spamUsers = [
 
 // Create our middleware
 module.exports = require('helper-service').start({
-	hostname: process.env.OPENSHIFT_IOJS_IP || '0.0.0.0',
-	port: process.env.OPENSHIFT_IOJS_PORT || process.env.PORT || 3000,
 	middleware: function (req, res, next) {
 		// Prepare
 		const ipAddress = req.headers['X-Forwarded-For'] || req.connection.remoteAddress
 		const logger = req.logger
-		const sendResponse = req.sendResponse
-		const sendError = req.sendError
-		const sendSuccess = req.sendSuccess
+		const sendError = res.sendError
+		const sendSuccess = res.sendSuccess
+		// const sendResponse = res.sendResponse
 
 		// Log a possible error
 		const logError = function (err) {
 			if ( err )  logger.log('err', err.stack || err.message || err)
-			return
 		}
 
 		// Log
@@ -66,11 +61,12 @@ module.exports = require('helper-service').start({
 		// Method Request
 		if ( req.query.method ) {
 			let branch, extension, url, version, subscriberData
+
 			// Add Subscriber
 			switch ( req.query.method ) {
 				// Exchange
 				case 'exchange':
-					version = (req.query.version || '')
+					version = req.query.version || ''
 					if ( semver.satisfies(version, '5') ) {
 						if ( semver.satisfies(version, '5.3') ) {
 							branch = 'docpad-5.3.x'
@@ -96,14 +92,14 @@ module.exports = require('helper-service').start({
 					}
 
 					url = `https://raw.githubusercontent.com/bevry/docpad-extras/${branch}/exchange.${extension}`
-					res.writeHead(codeRedirectPermanent, {'Location': url})
+					res.writeHead(codeRedirectPermanent, {Location: url})
 					res.end()
 					break
 
 				// Latest
 				case 'latest':
-					url = "https://raw.githubusercontent.com/bevry/docpad/master/package.json"
-					res.writeHead(codeRedirectPermanent, {'Location': url})
+					url = 'https://raw.githubusercontent.com/bevry/docpad/master/package.json'
+					res.writeHead(codeRedirectPermanent, {Location: url})
 					res.end()
 					break
 
@@ -127,7 +123,7 @@ module.exports = require('helper-service').start({
 					// Subscribe to the list
 					createSend.subscribers.addSubscriber(CM_LIST_ID, subscriberData, function (err, subscriber) {
 						// Error
-						email = (subscriber && subscriber.emailAddress) || null
+						const email = subscriber && subscriber.emailAddress || null
 						if ( err )  return sendError(err.message, {email: email})
 
 						// Send response back to client
@@ -177,13 +173,13 @@ module.exports = require('helper-service').start({
 
 				// Unknown method, continue
 				default:
-					return next()
+					return sendError('unknown method')
 			}
 		}
 
-		// Unknown Request
+		// No method at all, so 404 by continuing with the helper
 		else {
-			return sendError('unknown request')
+			return next()
 		}
 	}
 })
