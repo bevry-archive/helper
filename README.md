@@ -52,6 +52,12 @@ rhc tail -a helper
 ```
 
 
+## Todo
+
+1. Get startup hostel helper going locally
+1. Add environment variables and Continuous Deployment to Travis CI, like [how docpad/website does it](https://github.com/docpad/website/blob/master/.travis.yml#L45-L60).
+
+
 
 <!-- HISTORY/ -->
 
