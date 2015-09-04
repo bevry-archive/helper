@@ -1,54 +1,68 @@
-'use strict'
+export default function (opts) {
+	'use strict'
 
-// Require
-const CreateSend = require('createsend-node')
-const Analytics = require('analytics-node')
-const semver = require('semver')
+	// Import
+	const CreateSend = require('createsend-node')
+	const Analytics = require('analytics-node')
+	const PluginClerk = require('pluginclerk')
+	const semver = require('semver')
 
-// Config
-const SEGMENT_SECRET = process.env.SEGMENT_SECRET || null
-const CM_API_KEY = process.env.CM_API_KEY || null
-const CM_LIST_ID = process.env.CM_LIST_ID || null
-const codeRedirectPermanent = 301
-// const codeRedirectTemporary = 302
+	// Environment Variables
+	const envData = opts.env
+	const envKeys = [
+		'campaignMonitorKey',
+		'campaignMonitorListId',
+		'segmentKey'
+	]
+	envKeys.forEach(function (key) {
+		if ( !envData[key] ) {
+			throw new Error(`docpad: Environment Variable [${key}] is undefined`)
+		}
+	})
 
-// Check
-if ( !CM_API_KEY )  throw new Error('CM_API_KEY is undefined')
-if ( !CM_LIST_ID )  throw new Error('CM_LIST_ID is undefined')
-if ( !SEGMENT_SECRET )  throw new Error('SEGMENT_SECRET is undefined')
+	// Logger
+	const log = opts.log
 
-// Initialise libraries
-const analytics = new Analytics(SEGMENT_SECRET)
-const createSend = new CreateSend({apiKey: CM_API_KEY})
+	// Prepare
+	const appData = {
+		codeRedirectPermanent: 301,
+		codeRedirectTemporary: 302,
+		spamUsers: [
+			'Lonkly',
+			'55c7a10d69feeae52b991ba69e820c29aa1da960',
+			'ef87bc3cbb56a7d48e8a5024f9f33706b8146591',
+			'c0f96be80fa06706ad261a7d932cfd188041aae3',
+			'cabe082142f897bbe8958664951a84c57143ab63',
+			'1a1dfaed48032a8f11dd73bf9a34fd9f20fcb13e',
+			'4db16634288144bad2d154323ba966980254b07f'
+		]
+	}
 
-// Config
-const spamUsers = [
-	'Lonkly',
-	'55c7a10d69feeae52b991ba69e820c29aa1da960',
-	'ef87bc3cbb56a7d48e8a5024f9f33706b8146591',
-	'c0f96be80fa06706ad261a7d932cfd188041aae3',
-	'cabe082142f897bbe8958664951a84c57143ab63',
-	'1a1dfaed48032a8f11dd73bf9a34fd9f20fcb13e',
-	'4db16634288144bad2d154323ba966980254b07f'
-]
+	// Helpers
+	function logError (err) {
+		if ( err )  log('err', 'docpad:', err.stack || err.message || err)
+	}
 
-// Create our middleware
-module.exports = require('helper-service').start({
-	middleware: function (req, res, next) {
+	// Initialise
+	const analytics = new Analytics(envData.segmentKey)
+	const createSend = new CreateSend({apiKey: envData.campaignMonitorKey})
+	const pluginClerk = new PluginClerk({log: log, keyword: 'docpad-plugin', prefix: 'docpad-plugin-'})
+	const result = {}
+
+
+	// ===================================
+	// Middleware
+
+	// Create our middleware
+	result.middleware = function (req, res, next) {
 		// Prepare
 		const ipAddress = req.headers['X-Forwarded-For'] || req.connection.remoteAddress
-		const logger = req.logger
 		const sendError = res.sendError
 		const sendSuccess = res.sendSuccess
 		// const sendResponse = res.sendResponse
 
-		// Log a possible error
-		const logError = function (err) {
-			if ( err )  logger.log('err', err.stack || err.message || err)
-		}
-
 		// Log
-		logger.log('info', 'received request:', req.url, req.query, req.body)
+		log('info', 'docpad: received request:', req.url, req.query, req.body)
 
 		// Alias http://helper.docpad.org/exchange.blah?version=6.32.0 to http://helper.docpad.org/?method=exchange&version=6.32.0
 		if ( req.url.indexOf('exchange') !== -1 ) {
@@ -62,11 +76,12 @@ module.exports = require('helper-service').start({
 
 		// Method Request
 		if ( req.query.method ) {
-			let branch, extension, url, version, subscriberData
+			let branch, extension, url, version, subscriberData, clerkOptions
 
 			// Add Subscriber
 			switch ( req.query.method ) {
 				// Exchange
+				case 'skeletons':
 				case 'exchange':
 					version = req.query.version || ''
 					if ( semver.satisfies(version, '5') ) {
@@ -93,15 +108,39 @@ module.exports = require('helper-service').start({
 						return sendError('Unknown DocPad version', {version: version})
 					}
 
-					url = `https://raw.githubusercontent.com/bevry/docpad-extras/${branch}/exchange.${extension}`
-					res.writeHead(codeRedirectPermanent, {Location: url})
+					url = `http://raw.githubusercontent.com/bevry/docpad-extras/${branch}/exchange.${extension}`
+					log('debug', `Redirecting skeletons for ${req.query.version} to ${url}`)
+					res.writeHead(appData.codeRedirectPermanent, {Location: url})
 					res.end()
+					break
+
+				// Plugin
+				case 'plugin':
+					clerkOptions = {
+						name: req.body.name || req.query.name,
+						dependencies: req.body.dependencies
+					}
+					pluginClerk.fetchPlugin(clerkOptions, function (err, result) {
+						if ( err )  return sendError(err, clerkOptions)
+						res.sendSuccess(result)
+					})
+					break
+
+				// Plugins
+				case 'plugins':
+					clerkOptions = {
+						dependencies: req.body.dependencies
+					}
+					pluginClerk.fetchPlugins(clerkOptions, function (err, result) {
+						if ( err )  return sendError(err, clerkOptions)
+						res.sendSuccess(result)
+					})
 					break
 
 				// Latest
 				case 'latest':
-					url = 'https://raw.githubusercontent.com/bevry/docpad/master/package.json'
-					res.writeHead(codeRedirectPermanent, {Location: url})
+					url = 'http://raw.githubusercontent.com/bevry/docpad/master/package.json'
+					res.writeHead(appData.codeRedirectPermanent, {Location: url})
 					res.end()
 					break
 
@@ -123,7 +162,7 @@ module.exports = require('helper-service').start({
 					}
 
 					// Subscribe to the list
-					createSend.subscribers.addSubscriber(CM_LIST_ID, subscriberData, function (err, subscriber) {
+					createSend.subscribers.addSubscriber(envData.campaignMonitorListId, subscriberData, function (err, subscriber) {
 						// Error
 						const email = subscriber && subscriber.emailAddress || null
 						if ( err )  return sendError(err.message, {email: email})
@@ -144,11 +183,11 @@ module.exports = require('helper-service').start({
 					// No user
 					if ( !req.body.userId ) {
 						req.body.userId = 'undefined'
-						logger.log('warn', 'no user on track:', req.url, req.query, req.body)
+						log('warn', 'docpad: no user on track:', req.url, req.query, req.body)
 					}
 
 					// Check user
-					else if ( spamUsers.indexOf(req.body.userId) !== -1 ) {
+					else if ( appData.spamUsers.indexOf(req.body.userId) !== -1 ) {
 						return sendError('spam user')
 					}
 
@@ -184,4 +223,9 @@ module.exports = require('helper-service').start({
 			return next()
 		}
 	}
-})
+
+	// ===================================
+	// Export
+
+	return result
+}
