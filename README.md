@@ -25,17 +25,6 @@ A helper service that assists many of the bevry eco-system functions
 <!-- /DESCRIPTION -->
 
 
-<!-- INSTALL/ -->
-
-## Install
-
-### [NPM](http://npmjs.org/)
-- Use: `require('bevry-helper-service')`
-- Install: `npm install --save bevry-helper-service`
-
-<!-- /INSTALL -->
-
-
 ## Deploy
 
 ``` shell
@@ -127,5 +116,3 @@ and licensed under:
 - The incredibly [permissive](http://en.wikipedia.org/wiki/Permissive_free_software_licence) [MIT License](http://opensource.org/licenses/mit-license.php)
 
 <!-- /LICENSE -->
-
-
