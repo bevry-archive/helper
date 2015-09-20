@@ -109,21 +109,21 @@ module.exports = function middleware (req, res, next) {
 
 			// Create the subscriber
 			case 'add-subscriber':
-				const person = Person.add({
+				const person = Person.ensure({
 					email: req.query.email || req.body.email,
-					name: req.query.name || req.body.name || null // ,
+					profileName: req.query.name || req.body.name || null // ,
 					// username: req.query.username || req.body.username || null
 				})
 				const opts = {
 					campaignMonitorListId: env.docpad.campaignMonitorListId
 				}
-				person.subscribe(opts, function (err, subscriber) {
+				person.subscribe(opts, function (err, result) {
 					// Error
-					const email = subscriber && subscriber.emailAddress || null
-					if ( err )  return sendError(err.message, {email: email})
+					const email = result || null
+					if ( err )  return sendError(err.message, {email})
 
 					// Send response back to client
-					return sendSuccess({email: email})
+					return sendSuccess({email})
 				})
 				break
 

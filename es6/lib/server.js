@@ -23,8 +23,8 @@ module.exports = class Server {
 	start (opts, next) {
 		// Prepare
 		const _opts = require('extract-opts')(opts, next)
-		opts = _opts.opts || {}
-		next = _opts.next
+		opts = _opts[0]
+		next = _opts[1]
 
 		// Initialise libraries
 		const connect = require('connect')()
@@ -59,7 +59,7 @@ module.exports = class Server {
 						middleware.call(this, req, res, next)
 					}
 					catch ( err ) {
-						res.sendEreror(err)
+						res.sendError(err)
 					}
 				})
 			})
@@ -76,6 +76,14 @@ module.exports = class Server {
 			if ( next )  return next(null, connect, server)
 		})
 		this.server = server
+
+		// Chain
+		return this
+	}
+
+	destroy (opts, next) {
+		this.server.close(next)
+		return this
 	}
 
 	// Send Response Helper

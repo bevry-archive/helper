@@ -1,5 +1,10 @@
-module.exports = {
+/* eslint no-console:0 */
+// @TODO move this into the app class instance somehow so it is not a singleton, as singleton comes into issue with database and server closing
+
+// Prepare
+const state = {
 	app: {
+		log: console.log,
 		server: null,
 	},
 	bevry: {
@@ -19,5 +24,17 @@ module.exports = {
 		],
 		analytics: null,
 		pluginClerk: null
+	},
+	startuphostel: {
+		peopleFetcher: null
 	}
 }
+
+// Logging
+const logger = require('caterpillar').createLogger()
+const human = require('caterpillar-human').createHuman()
+logger.pipe(human).pipe(process.stdout)
+state.app.log = logger.log
+
+// Export
+module.exports = state

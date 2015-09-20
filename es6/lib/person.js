@@ -74,8 +74,7 @@ module.exports = class Person extends require('fellow') {
 		// Subscribe to the list
 		superagent.post(`https://api.createsend.com/api/v3.1/subscribers/${campaignMonitorListId}.json`).auth(env.bevry.campaignMonitorKey, 'x').send(data).end(function (err, result) {
 			if ( err )  return next(err)
-			console.log(result)
-			next()
+			next(null, result.body)
 		})
 
 		// Chain
@@ -163,7 +162,7 @@ module.exports = class Person extends require('fellow') {
 	}
 
 	static loadFromCampaignMonitor ({campaignMonitorListId, data = {}}, next) {
-		state.log('debug', 'Fetching campaign monitor data...')
+		state.app.log('debug', 'Fetching campaign monitor data...')
 
 		superagent
 			.get(`https://api.createsend.com/api/v3.1/lists/${campaignMonitorListId}/active.json`)
@@ -174,7 +173,7 @@ module.exports = class Person extends require('fellow') {
 					return next(new Error('Request for Campaign Monitor data has failed with error:\n' + err.stack))
 				}
 
-				state.log('debug', 'Fetched campaign monitor data')
+				state.app.log('debug', 'Fetched campaign monitor data')
 
 				for ( const result of dataResponse.body.Results ) {
 					Person.ensure(extendr.extend({
@@ -201,7 +200,7 @@ module.exports = class Person extends require('fellow') {
 	static loadFromTwitter ({twitterUsername, data = {}}, next) {
 		const authRequestString = `${escape(env.bevry.twitterConsumerKey)}:${escape(env.bevry.twitterConsumerSecret)}`
 		const authRequest = 'Basic ' + new Buffer(authRequestString).toString('base64')
-		state.log('debug', 'Fetching twitter authorization...')
+		state.app.log('debug', 'Fetching twitter authorization...')
 		superagent
 			.post(`https://api.twitter.com/oauth2/token`)
 			.type('form').accept('json')
@@ -224,9 +223,9 @@ module.exports = class Person extends require('fellow') {
 
 				const auth = 'Bearer ' + authResponse.body.access_token
 
-				state.log('debug', 'Fetched twitter authorization')
+				state.app.log('debug', 'Fetched twitter authorization')
 
-				state.log('debug', 'Fetching twitter data...')
+				state.app.log('debug', 'Fetching twitter data...')
 				superagent
 					.get(`https://api.twitter.com/1.1/followers/list.json?screen_name=${twitterUsername}`)
 					.type('json').accept('json')
@@ -237,7 +236,7 @@ module.exports = class Person extends require('fellow') {
 							return next(new Error('Request for Twitter data has failed with error:\n' + err.stack))
 						}
 
-						state.log('debug', 'Fetched twitter data')
+						state.app.log('debug', 'Fetched twitter data')
 
 						for ( const result of dataResponse.body.users ) {
 							Person.ensure(extendr.extend({
@@ -262,7 +261,7 @@ module.exports = class Person extends require('fellow') {
 	static loadFromFacebookGroup ({facebookGroupId, data = {}}, next) {
 		const url = `https://graph.facebook.com/v2.4/${facebookGroupId}/members?fields=name,id&limit=9999&access_token=${env.startuphostel.facebookAccessToken}`
 
-		state.log('debug', 'Fetching Facebook Group data...')
+		state.app.log('debug', 'Fetching Facebook Group data...')
 
 		superagent
 			.get(url)
@@ -278,7 +277,7 @@ module.exports = class Person extends require('fellow') {
 					return next(new Error('Request for Facebook Group data has failed with error:\n' + err.stack))
 				}
 
-				state.log('debug', 'Fetched Facebook Group data')
+				state.app.log('debug', 'Fetched Facebook Group data')
 
 				for ( const result of dataResponse.body.data ) {
 					Person.ensure(extendr.extend({

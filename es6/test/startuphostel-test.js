@@ -1,60 +1,54 @@
+/* eslint no-console:0 */
+'use strict'
+
 // Import
 const joe = require('joe')
 const assert = require('assert-helpers')
-const request = require('superagent')
+const superagent = require('superagent')
 
 // Task
-joe.describe('startuphostel-helper', function (describe, it) {
-	let serverURL, server
+joe.suite('startuphostel-helper', function (suite, test) {
+	let serverURL, server, app
 
-	it('should start the server', function (done) {
-		server = require('../lib/server').create()
-		const startupHostelMiddleware = require('../lib/startuphostel')({
-			log: server.log.bind(server),
-			env: {
-				campaignMonitorKey: process.env.SH_CM_KEY,
-				campaignMonitorListId: process.env.SH_CM_LIST_ID,
-				googleSpreadsheetKey: process.env.SH_SPREADSHEET_KEY,
-				googleSpreadsheetEmail: process.env.SH_SPREADSHEET_EMAIL,
-				googleSpreadsheetPassword: process.env.SH_SPREADSHEET_PASSWORD,
-				facebookGroupId: process.env.SH_FACEBOOK_GROUP_ID,
-				facebookAccessToken: process.env.SH_FACEBOOK_ACCESS_TOKEN,
-				apiKey: process.env.SH_API_KEY
-			}
+	suite('app', function (suite, test) {
+		test('create', function () {
+			app = require('../lib/app').create()
 		})
-		server.start({
-			middleware: startupHostelMiddleware,
-			next: function (error, app, _server) {
-				if ( error )  return done(error)
+		test('init', function (complete) {
+			app.init({}, complete)
+		})
+		test('listen', function (complete) {
+			app.listen({middlewares: [require('../lib/startuphostel')]}, function (err, _connect, _server) {
+				if ( err )  return complete(err)
 				server = _server
 				const address = server.address()
 				serverURL = `http://${address.address}:${address.port}`
-				done()
-			}
+				complete()
+			})
 		})
 	})
 
-	it('should send 404 correctly', function (done) {
+	test('should send 404 correctly', function (done) {
 		const url = `${serverURL}`
-		request.get(url).end(function (error, res) {
+		superagent.get(url).end(function (error, res) {
 			assert.equal(res.statusCode, 404, 'status code')
 			assert.deepEqual(res.body, { success: false, error: '404 Not Found' }, 'body')
 			done()
 		})
 	})
 
-	it('should fetch the data correctly', function (done) {
-		const url = `${serverURL}?method=startuphostel-data&key=${process.env.SH_API_KEY}`
-		request.get(url).redirects(2).end(function (error, res) {
+	test('should fetch the data correctly', function (done) {
+		const url = `${serverURL}?method=startuphostel-people&key=${process.env.SH_API_KEY}`
+		superagent.get(url).redirects(2).end(function (error, res) {
 			assert.equal(res.statusCode, 200, 'status code')
 			console.log(assert.inspect(res.body))
-			assert.equal(res.body.users.length > 10, true, 'should have returned more than 10 users')
+			assert.equal(res.body.people.length > 10, true, 'should have returned more than 10 people')
 			done()
 		})
 	})
 
-	it('should shutdown server correctly', function (done) {
-		server.close(done)
+	test('should shutdown server correctly', function (done) {
+		app.destroy({}, done)
 	})
 
 })
