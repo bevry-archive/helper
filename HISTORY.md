@@ -1,4 +1,4 @@
-## History
+# History
 
 ## v3.0.0 September 20, 2015
 - Added beginning of user database
