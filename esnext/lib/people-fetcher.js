@@ -1,3 +1,7 @@
+// @TODO add wufoo result fetching
+
+'use strict'
+
 // Imports
 const Person = require('./person')
 const env = require('./env')
