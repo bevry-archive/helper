@@ -141,8 +141,8 @@ module.exports = class Person extends require('fellow') {
 
 				for ( const result of results ) {
 					Person.ensure(extendr.extend({
-						profileName: result.Name,
 						email: result.Email,
+						profileName: result.Name,
 						skypeUsername: result.Skype,
 						twitterUsername: result.Twitter,
 						githubUsername: result.Github,
@@ -177,8 +177,8 @@ module.exports = class Person extends require('fellow') {
 
 				for ( const result of dataResponse.body.Results ) {
 					Person.ensure(extendr.extend({
-						profileName: result.name,
-						email: result.EmailAddress
+						email: result.EmailAddress,
+						profileName: result.name
 					}, data)).addSource(`campaign-monitor-${campaignMonitorListId}`)
 				}
 
