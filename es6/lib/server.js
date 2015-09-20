@@ -1,10 +1,13 @@
+/* eslint no-console:0 */
+'use strict'
+
 // Import
 const extendr = require('extendr')
 const urlUtil = require('url')
 
 // App
-export default class Server {
-	// logger
+module.exports = class Server {
+	// log
 	// connect
 	// server
 
@@ -12,25 +15,16 @@ export default class Server {
 		return new this(...args)
 	}
 
-	constructor ( opts = {} ) {
-		// Logging
-		if ( opts.logger ) {
-			this.logger = opts.logger
-		}
-		else {
-			const logger = require('caterpillar').createLogger()
-			const human = require('caterpillar-human').createHuman()
-			logger.pipe(human).pipe(process.stdout)
-			this.logger = logger
-		}
-
-		// Don't crash when an error occurs, instead log it
-		process.on('uncaughtException', this.logError.bind(this))
+	constructor (opts) {
+		if ( !opts.log )  throw new Error('No log option was passed to the server constructor')
+		this.log = opts.log
 	}
 
 	start (opts, next) {
 		// Prepare
-		[opts, next] = require('extract-opts')(opts, next)
+		const _opts = require('extract-opts')(opts, next)
+		opts = _opts.opts || {}
+		next = _opts.next
 
 		// Initialise libraries
 		const connect = require('connect')()
@@ -50,6 +44,7 @@ export default class Server {
 			res.sendResponse = res.sendResponse || this.sendResponse.bind(this, req, res)
 			res.sendError = res.sendError || this.sendError.bind(this, req, res)
 			res.sendSuccess = res.sendSuccess || this.sendSuccess.bind(this, req, res)
+			res.log = res.log || this.log
 			complete()
 		})
 
@@ -77,25 +72,17 @@ export default class Server {
 
 		// Start our server
 		const server = connect.listen(opts.port, opts.hostname, () => {
-			this.log('info', 'opened server on', opts.port, opts.hostname)
+			this.log('info', 'Opened server on', opts.port, opts.hostname)
 			if ( next )  return next(null, connect, server)
 		})
 		this.server = server
 	}
 
-	// Loger
-	log (...args) {
-		this.logger.log.apply(this.logger, args)
-	}
-
-	logError (err) {
-		if ( err ) {
-			this.log('err', err.stack || err.message || err)
-		}
-	}
-
 	// Send Response Helper
-	sendResponse (req, res, data, code = 200) {
+	sendResponse (req, res, data, code) {
+		// Prepare
+		code = code || 200
+
 		// Send code
 		res.writeHead(code, {
 			'Content-Type': 'application/json'
@@ -117,12 +104,15 @@ export default class Server {
 	}
 
 	// Send Error Helper
-	sendError (req, res, err, data = {}, code = 400) {
+	sendError (req, res, err, data, code) {
+		// Prepare
+		code = code || 400
+
 		// Prepare error
 		const responseData = extendr.extend({
 			success: false,
 			error: err.message || err
-		}, data)
+		}, data || {})
 
 		// Send error
 		this.log('warn', 'error details:', err.stack)
@@ -130,11 +120,14 @@ export default class Server {
 	}
 
 	// Send Success Helper
-	sendSuccess (req, res, data = {}, code = 200) {
+	sendSuccess (req, res, data, code) {
+		// Prepare
+		code = code || 200
+
 		// Prepare error
 		const responseData = extendr.extend({
 			success: true
-		}, data)
+		}, data || {})
 
 		// Send response
 		return res.sendResponse(responseData, code)

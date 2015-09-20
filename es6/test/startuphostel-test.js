@@ -5,11 +5,11 @@ const request = require('superagent')
 
 // Task
 joe.describe('startuphostel-helper', function (describe, it) {
-	let serverURL, server, startupHostelHelper
+	let serverURL, server
 
 	it('should start the server', function (done) {
 		server = require('../lib/server').create()
-		startupHostelHelper = require('../lib/startuphostel')({
+		const startupHostelMiddleware = require('../lib/startuphostel')({
 			log: server.log.bind(server),
 			env: {
 				campaignMonitorKey: process.env.SH_CM_KEY,
@@ -23,7 +23,7 @@ joe.describe('startuphostel-helper', function (describe, it) {
 			}
 		})
 		server.start({
-			middleware: startupHostelHelper.middleware,
+			middleware: startupHostelMiddleware,
 			next: function (error, app, _server) {
 				if ( error )  return done(error)
 				server = _server
@@ -32,10 +32,6 @@ joe.describe('startuphostel-helper', function (describe, it) {
 				done()
 			}
 		})
-	})
-
-	it('should start the worker', function () {
-		startupHostelHelper.worker()
 	})
 
 	it('should send 404 correctly', function (done) {

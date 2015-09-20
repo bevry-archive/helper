@@ -8,7 +8,7 @@ joe.describe('docpad-helper', function (describe, it) {
 	let serverURL, server
 	it('should start the server', function (done) {
 		server = require('../lib/server').create()
-		const helper = require('../lib/docpad')({
+		const docpadMiddleware = require('../lib/docpad')({
 			log: server.log.bind(server),
 			env: {
 				campaignMonitorKey: process.env.DP_CM_KEY,
@@ -17,7 +17,7 @@ joe.describe('docpad-helper', function (describe, it) {
 			}
 		})
 		server.start({
-			middleware: helper.middleware,
+			middleware: docpadMiddleware,
 			next: function (error, app, _server) {
 				if ( error )  return done(error)
 				server = _server
