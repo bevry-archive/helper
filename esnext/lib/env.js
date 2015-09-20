@@ -15,9 +15,6 @@ const env = {
 	},
 	startuphostel: {
 		campaignMonitorListId: 'SH_CM_LIST_ID',
-		googleSpreadsheetKey: 'SH_SPREADSHEET_KEY',
-		googleSpreadsheetEmail: 'SH_SPREADSHEET_EMAIL',
-		googleSpreadsheetPassword: 'SH_SPREADSHEET_PASSWORD',
 		facebookGroupId: 'SH_FACEBOOK_GROUP_ID',
 		facebookAccessToken: 'SH_FACEBOOK_ACCESS_TOKEN',
 		apiKey: 'SH_API_KEY'
