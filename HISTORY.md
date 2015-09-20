@@ -1,5 +1,9 @@
 ## History
 
+## v3.0.0 September 20, 2015
+- Added beginning of user database
+- Added startup hostel people fetching
+
 ## v1.0.4 March 14, 2015
 - Moved exchange and latest requests form docpad site to here
 

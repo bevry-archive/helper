@@ -7,7 +7,7 @@ sudo: false
 # We use node
 language: node_js
 node_js:
-  - iojs
+  - "4"
 cache:
   directories:
     - node_modules
@@ -21,5 +21,9 @@ before_script: "npm run-script compile"
 script: "npm test"
 
 # Custom notifications
-# travis encrypt --org "$SLACK_SUBDOMAIN:$SLACK_TRAVIS_TOKEN#updates" --add notifications.slack
-# travis encrypt --org "$TRAVIS_NOTIFICATION_EMAIL" --add notifications.email.recipients
+notifications:
+  slack:
+    secure: ksueP2XJIKgz3t7Q14r6+ISi2Md116VlcCifEZ/lY0HAqcKw7CorRAAvfNHQhy35YWbp6LUm+BApnuEq5hF01cU7g9bsYvhNM3hUv6uWHnbJ8GTyu5J4Y2lm4t6vG230yG4b3cXpzRiqFCu5OgAyIOGMwIUuo4ePq9EYMoe3DfQ=
+  email:
+    recipients:
+      secure: g5Kn+WSbZ1/aHSTY2n39w6/njST70ANZJ37sNxYQMiRlpdjNbDcVbTEDw3GGSt4u413iy9vs8z3IhwzGKl8pNPJW1lQ0TrQf8mHmV+moqX0p4GesTtRaIdR2Gs8KUsxV76aFEYCMy6dDwz+y9qXgOZURjRlpmpETw9Hr7XWUSiQ=
