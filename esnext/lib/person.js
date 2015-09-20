@@ -5,6 +5,7 @@
 const uuid = require('uuid')
 const superagent = require('superagent')
 const extendr = require('extendr')
+const eachr = require('eachr')
 const env = require('./env')
 const state = require('./state')
 
@@ -15,6 +16,10 @@ module.exports = class Person extends require('fellow') {
 		if ( this.uuid == null )  this.uuid = uuid.v4()
 	}
 
+	get displayName () {
+		return this.name || this.email || this.uuid
+	}
+
 	get ensureFields () {
 		return super.ensureFields.concat('names', 'facebookId', 'twitterId')
 	}
@@ -23,11 +28,42 @@ module.exports = class Person extends require('fellow') {
 		return this.profileName || this.facebookName || this.twitterName
 	}
 
+	get firstName () {
+		const name = this.name
+		if ( name ) {
+			return name.split(' ')[0]
+		}
+		return name
+	}
+
+	get lastName () {
+		const name = this.name
+		if ( name ) {
+			return name.split(' ').slice(-1)[0]
+		}
+		return name
+	}
+
+	get fullName () {
+		const names = []
+		const firstName = this.firstName
+		const lastName = this.lastName
+		if ( firstName )  names.push(firstName)
+		if ( lastName )   names.push(lastName)
+		return names.join(' ')
+	}
+
 	get names () {
 		const result = []
-		if ( this.profileName )   result.push(this.profileName)
-		if ( this.facebookName )  result.push(this.facebookName)
-		if ( this.twitterName )   result.push(this.twitterName)
+
+		// only match users by (profile) name if they have both names, as we don't want to match all "Ben" people
+		const firstName = this.firstName
+		const lastName = this.lastName
+		if ( firstName && lastName ) result.push(firstName + ' ' + lastName)
+
+		if ( this.facebookName ) result.push(this.facebookName)
+		if ( this.twitterName ) result.push(this.twitterName)
+
 		return result
 	}
 
@@ -72,28 +108,35 @@ module.exports = class Person extends require('fellow') {
 		}
 
 		// Subscribe to the list
-		superagent.post(`https://api.createsend.com/api/v3.1/subscribers/${campaignMonitorListId}.json`).auth(env.bevry.campaignMonitorKey, 'x').send(data).end(function (err, result) {
-			if ( err )  return next(err)
-			next(null, result.body)
-		})
+		superagent
+			.post(`https://api.createsend.com/api/v3.1/subscribers/${campaignMonitorListId}.json`)
+			.auth(env.bevry.campaignMonitorKey, 'x')
+			.send(data).end((err, result) => {
+				if ( err )  return next(err)
+				this.addSource(`campaign-monitor-${campaignMonitorListId}`)
+				next(null, result.body)
+			})
 
 		// Chain
 		return this
 	}
 
 	save (opts, next) {
-		const query = {
-			filter: {
-				uuid: this.uuid
-			},
-			update: {
-				$set: this.json
-			},
+		const filter = {
+			uuid: this.uuid
+		}
+		const update = {
+			$set: this.json
+		}
+		const options = {
 			upsert: true
 		}
-		state.bevry.db.updateOne(query, function (err, result) {
+
+		state.app.log('debug', `Saving ${this.displayName} to database...`)
+		state.bevry.db.collection('users').updateOne(filter, update, options, (err, response) => {
 			if ( err )  return next(err)
-			console.log(result)
+			state.app.log('debug', `Saved ${this.displayName} to database`, response.result)
+			// console.log(result)
 			next()
 		})
 	}
@@ -117,10 +160,14 @@ module.exports = class Person extends require('fellow') {
 	}
 
 	static loadFromDatabase (opts, next) {
+		state.app.log('debug', 'Fetching database data...')
 		state.bevry.db.collection('users').find({}).toArray((err, result) => {
 			if ( err )  return next(err)
-			console.log(result)
-			// this.add(result)
+
+			state.app.log('debug', 'Fetched database data')
+
+			Person.add(result)
+
 			next()
 		})
 
@@ -131,6 +178,18 @@ module.exports = class Person extends require('fellow') {
 	static loadFromCsv ({path, data = {}}, next) {
 		const csv = require('csv')
 		const fsUtil = require('safefs')
+		const fields = {
+			email: 'Email',
+			profileName: 'Name',
+			skypeUsername: 'Skype',
+			twitterUsername: 'Twitter',
+			githubUsername: 'Github',
+			facebookUsername: 'Facebook',
+			homepage: 'Website',
+			bio: 'Bio'
+		}
+
+		state.app.log('debug', 'Fetching CSV data...')
 		fsUtil.readFile(path, function (err, fileData) {
 			if ( err )  return next(err)
 			const csvOptions = {
@@ -139,18 +198,17 @@ module.exports = class Person extends require('fellow') {
 			csv.parse(fileData.toString(), csvOptions, function (err, results) {
 				if ( err )  return next(err)
 
+				state.app.log('debug', 'Fetched CSV data')
+
 				for ( const result of results ) {
-					Person.ensure(extendr.extend({
-						email: result.Email,
-						profileName: result.Name,
-						skypeUsername: result.Skype,
-						twitterUsername: result.Twitter,
-						githubUsername: result.Github,
-						facebookUsername: result.Facebook,
-						homepage: result.Website,
-						bio: result.Bio,
-						startupHostelSurvey: result
-					}, data)).addSource('startuphostel-csv')
+					const personData = {}
+					eachr(fields, function (resultKey, personKey) {
+						personData[personKey] = result[resultKey]
+						delete result[resultKey]
+					})
+					delete result.Avatar
+					personData.startupHostelSurvey = result
+					Person.ensure(extendr.extend(personData, data)).addSource('startuphostel-csv')
 				}
 
 				next()
@@ -178,7 +236,7 @@ module.exports = class Person extends require('fellow') {
 				for ( const result of dataResponse.body.Results ) {
 					Person.ensure(extendr.extend({
 						email: result.EmailAddress,
-						profileName: result.name
+						profileName: result.Name
 					}, data)).addSource(`campaign-monitor-${campaignMonitorListId}`)
 				}
 

@@ -28,6 +28,7 @@ module.exports = function (opts) {
 			})
 		})
 
+		/*
 		tasks.addTask('load people from the CSV file', function (complete) {
 			log('info', 'Loading people from the CSV file...')
 			const opts = {
@@ -42,6 +43,7 @@ module.exports = function (opts) {
 				complete()
 			})
 		})
+		*/
 
 		// Load people from twitter
 		function twitterTask (opts) {
@@ -110,9 +112,21 @@ module.exports = function (opts) {
 			})
 		})
 
+		/*
 		// Log who our people are
 		tasks.addTask('log', function () {
 			require('assert-helpers').log(Person.list)
+		})
+		*/
+
+		// Update them
+		tasks.addGroup('save', function (addGroup, addTask) {
+			this.setConfig({concurrency: 0})
+			Person.list.forEach(function (person) {
+				addTask(`Saving: ${person.displayName}`, function (complete) {
+					person.save({}, complete)
+				})
+			})
 		})
 
 		// Start

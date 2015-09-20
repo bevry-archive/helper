@@ -31,22 +31,25 @@ module.exports = class App {
 		}
 
 		if ( !state.docpad.analytics ) {
-			tasks.addTask('setup docpad analytics', () => {
+			tasks.addTask('setup docpad analytics', function () {
 				const Analytics = require('analytics-node')
 				state.docpad.analytics = new Analytics(env.docpad.segmentKey)
 			})
 		}
 
 		if ( !state.docpad.pluginClerk ) {
-			tasks.addTask('setup docpad plugin clerk', () => {
+			tasks.addTask('setup docpad plugin clerk', function () {
 				const PluginClerk = require('pluginclerk')
 				state.docpad.pluginClerk = new PluginClerk({log: state.app.log, keyword: 'docpad-plugin', prefix: 'docpad-plugin-'})
 			})
 		}
 
 		if ( !state.app.peopleFetcher ) {
-			tasks.addTask('setup people fetcher', () => {
+			tasks.addTask('setup people fetcher', function () {
 				state.app.peopleFetcher = require('./people-fetcher')({log: state.app.log})
+			})
+			tasks.addTask('fetch initial people', function (complete) {
+				state.app.peopleFetcher.request(complete)
 			})
 		}
 
