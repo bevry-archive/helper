@@ -5,6 +5,7 @@
   "version": "2.0.0",
   "description": "A helper service that assists many of the bevry eco-system functions",
   "homepage": "https://github.com/bevry/helper",
+  "license": "MIT",
   "keywords": [
     "api",
     "service",
@@ -12,20 +13,31 @@
     "docpad",
     "bevry"
   ],
-  "license": {
-    "type": "MIT"
-  },
   "badges": {
-    "travis": true,
-    "npm": false,
-    "npmdownloads": false,
-    "david": false,
-    "daviddev": false,
-    "gratipay": "bevry",
-    "flattr": "344188/balupton-on-Flattr",
-    "paypal": "QB8GQPZAH84N6",
-    "bitcoin": "https://bevry.me/bitcoin",
-    "wishlist": "https://bevry.me/wishlist"
+    "list": [
+      "travisci",
+      "npmversion",
+      "npmdownloads",
+      "daviddm",
+      "daviddmdev",
+      "---",
+      "slackin",
+      "patreon",
+      "gratipay",
+      "flattr",
+      "paypal",
+      "bitcoin",
+      "wishlist"
+    ],
+    "config": {
+      "patreonUsername": "bevry",
+      "gratipayUsername": "bevry",
+      "flattrCode": "344188/balupton-on-Flattr",
+      "paypalButtonID": "QB8GQPZAH84N6",
+      "bitcoinURL": "https://bevry.me/bitcoin",
+      "wishlistURL": "https://bevry.me/wishlist",
+      "slackinURL": "https://slack.bevry.me"
+    }
   },
   "author": "2012+ Bevry Pty Ltd <us@bevry.me> (http://bevry.me)",
   "maintainers": [
@@ -75,7 +87,6 @@
     "joe-reporter-console": "^1.2.1",
     "projectz": "^1.0.2"
   },
-  "main": "./es6/lib/index.js",
   "scripts": {
     "clean": "node --harmony nakefile.js clean",
     "setup": "node --harmony nakefile.js setup",
@@ -85,11 +96,11 @@
     "meta": "node --harmony nakefile.js meta",
     "prepare": "node --harmony nakefile.js prepare",
     "release": "node --harmony nakefile.js release",
-    "test": "node --harmony --harmony_destructuring ./es6/test/index-test.js",
-    "start": "node --harmony --harmony_destructuring ./es6/bin/index.js"
+    "test": "node --harmony --harmony_destructuring ./esnext/test/index-test.js",
+    "start": "node --harmony --harmony_destructuring ./esnext/bin/index.js"
   },
   "nakeConfiguration": {
-    "ESLINT_SRC_PATH": "es6",
-    "YUIDOC_SRC_PATH": "es6"
+    "ESLINT_SRC_PATH": "esnext",
+    "YUIDOC_SRC_PATH": "esnext"
   }
 }
