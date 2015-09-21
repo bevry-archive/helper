@@ -41,7 +41,6 @@ joe.suite('startuphostel-helper', function (suite, test) {
 		const url = `${serverURL}?method=startuphostel-people&key=${process.env.SH_API_KEY}`
 		superagent.get(url).redirects(2).end(function (error, res) {
 			assert.equal(res.statusCode, 200, 'status code')
-			console.log(assert.inspect(res.body))
 			assert.equal(res.body.people.length > 10, true, 'should have returned more than 10 people')
 			done()
 		})
