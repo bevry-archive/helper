@@ -1,9 +1,15 @@
-/* eslint no-console:0 */
+/* eslint no-console:0, no-magic-numbers:0, prefer-reflect:0, max-params:0 */
 'use strict'
 
 // Import
 const extendr = require('extendr')
 const urlUtil = require('url')
+
+// Prepare
+const PORT_DEFAULT = 8000
+const HTTP_NOT_FOUND = 404
+const HTTP_OK = 200
+const HTTP_BAD_REQUEST = 400
 
 // App
 module.exports = class Server {
@@ -32,7 +38,7 @@ module.exports = class Server {
 
 		// Server Options
 		const hostenv = require('hostenv')
-		opts.port = opts.port || hostenv.PORT || 8000
+		opts.port = opts.port || hostenv.PORT || PORT_DEFAULT
 		opts.hostname = opts.hostname || hostenv.HOSTNAME || '0.0.0.0'
 		opts.limit = opts.limit || '200kb'
 
@@ -67,7 +73,7 @@ module.exports = class Server {
 
 		// 404
 		connect.use(function (req, res) {
-			res.sendError('404 Not Found', null, 404)
+			res.sendError('404 Not Found', null, HTTP_NOT_FOUND)
 		})
 
 		// Start our server
@@ -89,7 +95,7 @@ module.exports = class Server {
 	// Send Response Helper
 	sendResponse (req, res, data, code) {
 		// Prepare
-		code = code || 200
+		code = code || HTTP_OK
 
 		// Send code
 		res.writeHead(code, {
@@ -103,7 +109,7 @@ module.exports = class Server {
 			: JSON.stringify(data)
 
 		// Log
-		const level = code === 200 ? 'info' : 'warning'
+		const level = code === HTTP_OK ? 'info' : 'warning'
 		this.log(level, `${code} response:`, str)
 
 		// Flush
@@ -114,7 +120,7 @@ module.exports = class Server {
 	// Send Error Helper
 	sendError (req, res, err, data, code) {
 		// Prepare
-		code = code || 400
+		code = code || HTTP_BAD_REQUEST
 
 		// Prepare error
 		const responseData = extendr.extend({
@@ -130,7 +136,7 @@ module.exports = class Server {
 	// Send Success Helper
 	sendSuccess (req, res, data, code) {
 		// Prepare
-		code = code || 200
+		code = code || HTTP_OK
 
 		// Prepare error
 		const responseData = extendr.extend({
@@ -149,7 +155,7 @@ module.exports = class Server {
 		res.setHeader('Access-Control-Allow-Methods', 'OPTIONS, GET')
 		res.setHeader('Access-Control-Allow-Headers', '*')
 		if ( req.method === 'OPTIONS' ) {
-			res.writeHead(200)
+			res.writeHead(HTTP_OK)
 			res.end()
 		}
 		else {

@@ -1,5 +1,4 @@
-/* eslint no-console:0 */
-
+/* eslint no-console:0, prefer-reflect:0 */
 'use strict'
 
 const uuid = require('uuid')
@@ -149,13 +148,13 @@ module.exports = class Person extends require('fellow') {
 
 	static docpadUsers () {
 		return this.list.filter(function (person) {
-			return !!person.docpadUser
+			return Boolean(person.docpadUser)
 		})
 	}
 
 	static startupHostelUsers () {
 		return this.list.filter(function (person) {
-			return !!person.startupHostelUser
+			return Boolean(person.startupHostelUser)
 		})
 	}
 
@@ -258,9 +257,12 @@ module.exports = class Person extends require('fellow') {
 	static loadFromTwitter ({twitterUsername, data = {}}, next) {
 		const authRequestString = `${escape(env.bevry.twitterConsumerKey)}:${escape(env.bevry.twitterConsumerSecret)}`
 		const authRequest = 'Basic ' + new Buffer(authRequestString).toString('base64')
+		const tokenUrl = `https://api.twitter.com/oauth2/token?random=${Math.random()}`
+		const dataUrl = `https://api.twitter.com/1.1/followers/list.json?screen_name=${twitterUsername}&random=${Math.random()}`
+
 		state.app.log('debug', 'Fetching twitter authorization...')
 		superagent
-			.post(`https://api.twitter.com/oauth2/token`)
+			.post(tokenUrl)
 			.type('form').accept('json')
 			.set('User-Agent', `Bevry's Helper App`)
 			.set('Authorization', authRequest)
@@ -269,29 +271,54 @@ module.exports = class Person extends require('fellow') {
 				if ( authResponse && authResponse.body.errors ) {
 					return next(new Error(
 						'Request for Twitter Authorization has failed with returned error:\n' +
-						require('util').inspect(authResponse.body.errors[0])
+						`On: ${tokenUrl}\n` +
+						'Error:\n' + require('util').inspect(authResponse.body.errors[0])
 					))
 				}
 				else if ( err ) {
-					return next(new Error('Request for Twitter Authorization has failed with error:\n' + err.stack))
+					return next(new Error(
+						'Request for Twitter Authorization has failed with error:\n' +
+						`On: ${dataUrl}\n` +
+						err.stack
+					))
 				}
 				else if ( !authResponse.body.token_type || !authResponse.body.access_token ) {
-					return next(new Error('Request for Twitter Authorization has failed with no results.'))
+					return next(new Error(
+						'Request for Twitter Authorization has failed with no results:\n' +
+						`On: ${dataUrl}\n` +
+						require('util').inspect(authResponse.body)
+					))
 				}
 
 				const auth = 'Bearer ' + authResponse.body.access_token
-
 				state.app.log('debug', 'Fetched twitter authorization')
-
 				state.app.log('debug', 'Fetching twitter data...')
 				superagent
-					.get(`https://api.twitter.com/1.1/followers/list.json?screen_name=${twitterUsername}`)
+					.get(dataUrl)
 					.type('json').accept('json')
 					.set('User-Agent', `Bevry's Helper App`)
 					.set('Authorization', auth)
 					.end(function (err, dataResponse) {
-						if ( err ) {
-							return next(new Error('Request for Twitter data has failed with error:\n' + err.stack))
+						if ( dataResponse && dataResponse.body.errors ) {
+							return next(new Error(
+								'Request for Twitter data has failed:\n' +
+								`On: ${dataUrl}\n` +
+								'Error:\n' + require('util').inspect(dataResponse.body.errors[0])
+							))
+						}
+						else if ( err ) {
+							return next(new Error(
+								'Request for Twitter data has failed:\n' +
+								`On: ${dataUrl}\n` +
+								err.stack
+							))
+						}
+						else if ( !dataResponse.body.users ) {
+							return next(new Error(
+								'Request for Twitter data has failed with no results:\n' +
+								`On: ${dataUrl}\n` +
+								require('util').inspect(dataResponse.body)
+							))
 						}
 
 						state.app.log('debug', 'Fetched twitter data')

@@ -1,5 +1,4 @@
 // @TODO add wufoo result fetching
-
 'use strict'
 
 // Imports
@@ -135,10 +134,7 @@ module.exports = function (opts) {
 
 
 	// Check
-	const cachely = require('cachely').create({
-		method: fetchPeople,
-		log: log
-	})
+	const cachely = require('cachely').create({method: fetchPeople, log})
 
 	// Return
 	return cachely

@@ -1,3 +1,5 @@
+'use strict'
+
 // Imports
 const eachr = require('eachr')
 
@@ -7,7 +9,9 @@ const env = {
 		campaignMonitorKey: 'BEVRY_CM_KEY',
 		databaseUrl: 'BEVRY_DATABASE_URL',
 		twitterConsumerKey: 'BEVRY_TWITTER_CONSUMER_KEY',
-		twitterConsumerSecret: 'BEVRY_TWITTER_CONSUMER_SECRET'
+		twitterConsumerSecret: 'BEVRY_TWITTER_CONSUMER_SECRET',
+		twitterAccessToken: 'TWITTER_ACCESS_TOKEN',
+		twitterAccessTokenSecret: 'TWITTER_ACCESS_TOKEN_SECRET'
 	},
 	docpad: {
 		campaignMonitorListId: 'DP_CM_LIST_ID',

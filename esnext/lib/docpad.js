@@ -64,7 +64,7 @@ module.exports = function middleware (req, res, next) {
 					}
 				}
 				else {
-					return sendError('Unknown DocPad version', {version: version})
+					return sendError('Unknown DocPad version', {version})
 				}
 
 				url = `http://raw.githubusercontent.com/bevry/docpad-extras/${branch}/exchange.${extension}`
@@ -108,7 +108,7 @@ module.exports = function middleware (req, res, next) {
 				return sendSuccess()
 
 			// Create the subscriber
-			case 'add-subscriber':
+			case 'add-subscriber': {
 				const person = Person.ensure({
 					email: req.query.email || req.body.email,
 					profileName: req.query.name || req.body.name || null,
@@ -126,6 +126,7 @@ module.exports = function middleware (req, res, next) {
 					})
 				})
 				break
+			}
 
 			// Analytics
 			case 'analytics':
