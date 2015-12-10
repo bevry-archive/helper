@@ -54,7 +54,7 @@
     "url": "http://github.com/bevry/helper.git"
   },
   "engines": {
-    "node": ">=4"
+    "node": "4"
   },
   "dependencies": {
     "analytics-node": "^2.0.0",
