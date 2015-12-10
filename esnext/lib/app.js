@@ -31,7 +31,7 @@ module.exports = class App {
 			this.log('warn', new Error(`ready callback for ${name} will not be fired as app has been destroyed`))
 		}
 		else if ( !this.initialized ) {
-			this.setTimeout(this.ready.bind(this, {name}, next), READY_DELAY)
+			setTimeout(this.ready.bind(this, {name}, next), READY_DELAY)
 		}
 
 		// Chain
