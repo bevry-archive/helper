@@ -32,7 +32,8 @@ module.exports = class App {
 
 		/* eslint camelcase:0 */
 		if ( !state.bevry.twitterClient ) {
-			tasks.addTask('setup twitter api client', (complete) => {
+			tasks.addTask('setup twitter api client', function () {
+				state.app.log('info', 'Init Twitter API Client')
 				const Twit = require('twit')
 				state.bevry.twitterClient = new Twit({
 					consumer_key: env.bevry.twitterConsumerKey,
@@ -40,12 +41,12 @@ module.exports = class App {
 					access_token: env.bevry.twitterAccessToken,
 					access_token_secret: env.bevry.twitterAccessTokenSecret
 				})
-				complete()
 			})
 		}
 
 		if ( !state.docpad.analytics ) {
 			tasks.addTask('setup docpad analytics', function () {
+				state.app.log('info', 'Init DocPad Analytics')
 				const Analytics = require('analytics-node')
 				state.docpad.analytics = new Analytics(env.docpad.segmentKey)
 			})
@@ -53,17 +54,20 @@ module.exports = class App {
 
 		if ( !state.docpad.pluginClerk ) {
 			tasks.addTask('setup docpad plugin clerk', function () {
+				state.app.log('info', 'Init Plugin Clerk')
 				const PluginClerk = require('pluginclerk')
 				state.docpad.pluginClerk = new PluginClerk({log: state.app.log, keyword: 'docpad-plugin', prefix: 'docpad-plugin-'})
 			})
 		}
 
 		if ( !state.app.peopleFetcher ) {
-			tasks.addTask('setup people fetcher', function () {
+			tasks.addTask('setup people fetcher and fetch people', function (complete) {
+				state.app.log('info', 'Initialising people fetcher...')
 				state.app.peopleFetcher = require('./people-fetcher')({log: state.app.log})
-			})
-			tasks.addTask('fetch initial people', function (complete) {
-				state.app.peopleFetcher.request(complete)
+				state.app.peopleFetcher.request(function (...args) {
+					state.app.log('info', 'Initialised people fetcher')
+					complete(...args)
+				})
 			})
 		}
 
