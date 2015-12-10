@@ -20,9 +20,9 @@ module.exports = class App {
 		this._destroyed = false
 		this._setup = false
 		this._logger = null
+		this._log = console.log
 		this.db = null
 		this.server = null
-		this._log = console.log
 		state.app = this
 	}
 
