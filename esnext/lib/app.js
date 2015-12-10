@@ -7,18 +7,58 @@ const Server = require('./server')
 const env = require('./env')
 const state = require('./state')
 
+// Prepare
+const READY_DELAY = 500
+
 // App
 module.exports = class App {
 	static create (...args) {
 		return new this(...args)
 	}
 
-	log (...args) {
-		state.app.log(...args)
+	constructor () {
+		this._destroyed = false
+		this._setup = false
 	}
 
-	init (opts, next) {
-		if ( this.destroyed )  return next(new Error('Init failed as Application has been destroyed'))
+	// This gets overwrote in ./state.js
+	log (...args) {
+		console.log(...args)
+	}
+
+	ready ({name = 'unknown'}, next) {
+		if ( this._destroyed ) {
+			console.log(`ready callback for ${name} will not be fired as app has been destroyed`)
+		}
+		else if ( !this.initialized ) {
+			this.setTimeout(this.ready.bind(this, {name}, next), READY_DELAY)
+		}
+
+		// Chain
+		return this
+	}
+
+	start (opts, next) {
+		if ( this._destroyed )  return next(new Error('Start failed as Application has been destroyed'))
+
+		const tasks = new TaskGroup().done(next)
+
+		tasks.addTask((complete) => {
+			this.listen(opts, complete)
+		})
+
+		tasks.addTask((complete) => {
+			this.setup(opts, complete)
+		})
+
+		tasks.run()
+
+		// Chain
+		return this
+	}
+
+	setup (opts, next) {
+		if ( this._destroyed )  return next(new Error('Setup failed as Application has been destroyed'))
 
 		const tasks = new TaskGroup().done(next)
 
@@ -69,11 +109,15 @@ module.exports = class App {
 				state.app.log('info', 'Initialising people fetcher...')
 				state.app.peopleFetcher = require('./people-fetcher')({log: state.app.log})
 				state.app.peopleFetcher.request(function (...args) {
-					state.app.log('info', 'Initialised people fetcher')
+					state.app.log('info', 'Initialized people fetcher')
 					complete(...args)
 				})
 			})
 		}
+
+		tasks.addTask('setup completed', () => {
+			this._setup = true
+		})
 
 		tasks.run()
 
@@ -81,15 +125,14 @@ module.exports = class App {
 	}
 
 	listen (opts, next) {
-		if ( this.destroyed )  return next(new Error('Init failed as Application has been destroyed'))
-
+		if ( this._destroyed )  return next(new Error('Listen failed as Application has been destroyed'))
 		const middlewares = opts.middlewares || [require('./docpad'), require('./startuphostel')]
 		state.app.server = Server.create({log: state.app.log}).start({middlewares, next})
 		return this
 	}
 
 	destroy (opts, next) {
-		this.destroyed = true
+		this._destroyed = true
 
 		const tasks = new TaskGroup().done(next)
 

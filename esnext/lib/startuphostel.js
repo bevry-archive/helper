@@ -14,18 +14,23 @@ module.exports = function middleware (req, res, next) {
 			res.sendError(new Error('Not Authorised'), HTTP_UNAUTHORIZED)
 		}
 		else {
-			state.app.peopleFetcher.request(function (err) {
+			// Wait for ready
+			state.app.ready({}, function (err) {
 				if ( err )  return res.sendError(err)
-				const people = require('./person').startupHostelUsers().map(function (person) {
-					return {
-						name: person.name,
-						bio: person.bio,
-						url: person.url,
-						email: person.email,
-						avatar: person.avatar
-					}
+				// Ready
+				state.app.peopleFetcher.request(function (err) {
+					if ( err )  return res.sendError(err)
+					const people = require('./person').startupHostelUsers().map(function (person) {
+						return {
+							name: person.name,
+							bio: person.bio,
+							url: person.url,
+							email: person.email,
+							avatar: person.avatar
+						}
+					})
+					res.sendSuccess({people})
 				})
-				res.sendSuccess({people})
 			})
 		}
 	}

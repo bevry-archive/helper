@@ -11,14 +11,6 @@ module.exports = function middleware (req, res, next) {
 	// Prepare
 	const log = res.log
 	const ipAddress = req.headers['X-Forwarded-For'] || req.connection.remoteAddress
-	const sendError = res.sendError
-	const sendSuccess = res.sendSuccess
-	// const sendResponse = res.sendResponse
-
-	// Helpers
-	function logError (err) {
-		if ( err )  log('err', 'docpad:', err.stack || err.message || err)
-	}
 
 	// Log
 	log('info', 'docpad: received request:', req.url, req.query, req.body)
@@ -64,7 +56,7 @@ module.exports = function middleware (req, res, next) {
 					}
 				}
 				else {
-					return sendError('Unknown DocPad version', {version})
+					return res.sendError('Unknown DocPad version', {version})
 				}
 
 				url = `http://raw.githubusercontent.com/bevry/docpad-extras/${branch}/exchange.${extension}`
@@ -79,9 +71,15 @@ module.exports = function middleware (req, res, next) {
 					name: req.body.name || req.query.name,
 					dependencies: req.body.dependencies
 				}
-				state.docpad.pluginClerk.fetchPlugin(clerkOptions, function (err, result) {
-					if ( err )  return sendError(err, clerkOptions)
-					res.sendSuccess(result)
+
+				// Wait for ready
+				state.app.ready({}, function (err) {
+					if ( err )  return res.sendError(err)
+					// Ready
+					state.docpad.pluginClerk.fetchPlugin(clerkOptions, function (err, result) {
+						if ( err )  return res.sendError(err, clerkOptions)
+						res.res.sendSuccess(result)
+					})
 				})
 				break
 
@@ -90,9 +88,14 @@ module.exports = function middleware (req, res, next) {
 				clerkOptions = {
 					dependencies: req.body.dependencies
 				}
-				state.docpad.pluginClerk.fetchPlugins(clerkOptions, function (err, result) {
-					if ( err )  return sendError(err, clerkOptions)
-					res.sendSuccess(result)
+				// Wait for ready
+				state.app.ready({}, function (err) {
+					if ( err )  return res.sendError(err)
+					// Ready
+					state.docpad.pluginClerk.fetchPlugins(clerkOptions, function (err, result) {
+						if ( err )  return res.sendError(err, clerkOptions)
+						res.res.sendSuccess(result)
+					})
 				})
 				break
 
@@ -105,7 +108,8 @@ module.exports = function middleware (req, res, next) {
 
 			// Ping
 			case 'ping':
-				return sendSuccess()
+				res.sendSuccess()
+				break
 
 			// Create the subscriber
 			case 'add-subscriber': {
@@ -119,10 +123,10 @@ module.exports = function middleware (req, res, next) {
 					campaignMonitorListId: env.docpad.campaignMonitorListId
 				}
 				person.subscribe(opts, function (err) {
-					if ( err )  return sendError(err.message, {email: person.email})
+					if ( err )  return res.sendError(err.message, {email: person.email})
 					person.save({}, function (err) {
-						if ( err )  return sendError(err.message, {email: person.email})
-						return sendSuccess({email: person.email})
+						if ( err )  return res.sendError(err.message, {email: person.email})
+						return res.sendSuccess({email: person.email})
 					})
 				})
 				break
@@ -132,7 +136,7 @@ module.exports = function middleware (req, res, next) {
 			case 'analytics':
 				// Check body
 				if ( Object.keys(req.body).length === 0 ) {
-					return sendError('missing body', req.body)
+					return res.sendError('missing body', req.body)
 				}
 
 				// No user
@@ -143,33 +147,41 @@ module.exports = function middleware (req, res, next) {
 
 				// Check user
 				else if ( state.docpad.spamUsers.indexOf(req.body.userId) !== -1 ) {
-					return sendError('spam user')
+					return res.sendError('spam user')
 				}
 
 				// Adjust params
 				req.body.context = req.body.context || {}
 				req.body.context.ip = req.body.context.ip || ipAddress
 
-				// Action
-				switch ( req.query.action ) {
-					case 'identify':
-						state.docpad.analytics.identify(req.body, logError)
-						break
+				// Wait for ready
+				state.app.ready({}, function (err) {
+					if ( err )  return res.sendError(err)
+					// Ready
 
-					case 'track':
-						state.docpad.analytics.track(req.body, logError)
-						break
+					// Action
+					switch ( req.query.action ) {
+						case 'identify':
+							state.docpad.analytics.identify(req.body, res.sendError)
+							break
 
-					default:
-						return sendError('unknown action')
-				}
+						case 'track':
+							state.docpad.analytics.track(req.body, res.sendError)
+							break
 
-				// Send response back to client
-				return sendSuccess()
+						default:
+							return res.sendError('unknown action')
+					}
+
+					// Send response back to client
+					res.sendSuccess()
+				})
+				break
 
 			// Unknown method, continue
 			default:
-				return sendError('unknown method')
+				res.sendError('unknown method')
+				break
 		}
 	}
 

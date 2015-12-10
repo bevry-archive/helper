@@ -18,8 +18,8 @@ joe.suite('docpad-helper', function (suite, test) {
 		test('create', function () {
 			app = require('../lib/app').create()
 		})
-		test('init', function (complete) {
-			app.init({}, complete)
+		test('setup', function (complete) {
+			app.setup({}, complete)
 		})
 		test('listen', function (complete) {
 			app.listen({middlewares: [require('../lib/docpad')]}, function (err, _connect, _server) {
