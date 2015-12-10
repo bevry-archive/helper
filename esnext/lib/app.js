@@ -16,14 +16,15 @@ module.exports = class App {
 		return new this(...args)
 	}
 
-	constructor () {
+	constructor (opts = {}) {
 		this._destroyed = false
 		this._setup = false
 		this._logger = null
-		this._log = console.log
+		this._log = opts.log || console.log
 		this.db = null
 		this.server = null
 		state.app = this
+		this.log = this.log.bind(this)
 	}
 
 	log (...args) {

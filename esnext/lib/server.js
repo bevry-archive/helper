@@ -21,8 +21,9 @@ module.exports = class Server {
 		return new this(...args)
 	}
 
-	constructor (opts) {
+	constructor (opts = {}) {
 		this._log = opts.log || console.log
+		this.log = this.log.bind(this)
 	}
 
 	log (...args) {

@@ -17,7 +17,7 @@ joe.suite('server', function (suite, test) {
 
 	suite('server', function (suite, test) {
 		test('create', function () {
-			server = require('../lib/server').create({log: console.log})
+			server = require('../lib/server').create()
 		})
 		test('start', function (done) {
 			server.start({
