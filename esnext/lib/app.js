@@ -30,6 +30,20 @@ module.exports = class App {
 			})
 		}
 
+		/* eslint camelcase:0 */
+		if ( !state.bevry.twitterClient ) {
+			tasks.addTask('setup twitter api client', (complete) => {
+				const Twit = require('twit')
+				state.bevry.twitterClient = new Twit({
+					consumer_key: env.bevry.twitterConsumerKey,
+					consumer_secret: env.bevry.twitterConsumerSecret,
+					access_token: env.bevry.twitterAccessToken,
+					access_token_secret: env.bevry.twitterAccessTokenSecret
+				})
+				complete()
+			})
+		}
+
 		if ( !state.docpad.analytics ) {
 			tasks.addTask('setup docpad analytics', function () {
 				const Analytics = require('analytics-node')

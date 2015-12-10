@@ -11,7 +11,8 @@ const env = {
 		twitterConsumerKey: 'BEVRY_TWITTER_CONSUMER_KEY',
 		twitterConsumerSecret: 'BEVRY_TWITTER_CONSUMER_SECRET',
 		twitterAccessToken: 'TWITTER_ACCESS_TOKEN',
-		twitterAccessTokenSecret: 'TWITTER_ACCESS_TOKEN_SECRET'
+		twitterAccessTokenSecret: 'TWITTER_ACCESS_TOKEN_SECRET',
+		facebookAccessToken: 'BEVRY_FACEBOOK_APP_ACCESS_TOKEN'
 	},
 	docpad: {
 		campaignMonitorListId: 'DP_CM_LIST_ID',
@@ -20,7 +21,6 @@ const env = {
 	startuphostel: {
 		campaignMonitorListId: 'SH_CM_LIST_ID',
 		facebookGroupId: 'SH_FACEBOOK_GROUP_ID',
-		facebookAccessToken: 'SH_FACEBOOK_ACCESS_TOKEN',
 		apiKey: 'SH_API_KEY'
 	}
 }

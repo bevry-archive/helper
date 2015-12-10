@@ -255,99 +255,48 @@ module.exports = class Person extends require('fellow') {
 	}
 
 	static loadFromTwitter ({twitterUsername, data = {}}, next) {
-		const authRequestString = `${escape(env.bevry.twitterConsumerKey)}:${escape(env.bevry.twitterConsumerSecret)}`
-		const authRequest = 'Basic ' + new Buffer(authRequestString).toString('base64')
-		const tokenUrl = `https://api.twitter.com/oauth2/token?random=${Math.random()}`
-		const dataUrl = `https://api.twitter.com/1.1/followers/list.json?screen_name=${twitterUsername}&random=${Math.random()}`
+		/* eslint camelcase:0 */
+		state.app.log('debug', 'Fetching twitter data...', twitterUsername)
+		state.bevry.twitterClient.get('followers/list', {screen_name: twitterUsername}, function (err, data) {
+			if (err) {
+				return next(new Error(
+					'Request for Twitter data has failed with error:\n' + err.stack
+				))
+			}
+			else if ( !data.users ) {
+				return next(new Error(
+					'Request for Twitter data has failed with no results:\n' +
+					`Screen Name: ${twitterUsername}\n` +
+					require('util').inspect(data)
+				))
+			}
 
-		state.app.log('debug', 'Fetching twitter authorization...')
-		superagent
-			.post(tokenUrl)
-			.type('form').accept('json')
-			.set('User-Agent', `Bevry's Helper App`)
-			.set('Authorization', authRequest)
-			.send('grant_type=client_credentials')
-			.end(function (err, authResponse) {
-				if ( authResponse && authResponse.body.errors ) {
-					return next(new Error(
-						'Request for Twitter Authorization has failed with returned error:\n' +
-						`On: ${tokenUrl}\n` +
-						'Error:\n' + require('util').inspect(authResponse.body.errors[0])
-					))
-				}
-				else if ( err ) {
-					return next(new Error(
-						'Request for Twitter Authorization has failed with error:\n' +
-						`On: ${dataUrl}\n` +
-						err.stack
-					))
-				}
-				else if ( !authResponse.body.token_type || !authResponse.body.access_token ) {
-					return next(new Error(
-						'Request for Twitter Authorization has failed with no results:\n' +
-						`On: ${dataUrl}\n` +
-						require('util').inspect(authResponse.body)
-					))
-				}
+			state.app.log('debug', 'Fetched twitter data', twitterUsername)
 
-				const auth = 'Bearer ' + authResponse.body.access_token
-				state.app.log('debug', 'Fetched twitter authorization')
-				state.app.log('debug', 'Fetching twitter data...')
-				superagent
-					.get(dataUrl)
-					.type('json').accept('json')
-					.set('User-Agent', `Bevry's Helper App`)
-					.set('Authorization', auth)
-					.end(function (err, dataResponse) {
-						if ( dataResponse && dataResponse.body.errors ) {
-							return next(new Error(
-								'Request for Twitter data has failed:\n' +
-								`On: ${dataUrl}\n` +
-								'Error:\n' + require('util').inspect(dataResponse.body.errors[0])
-							))
-						}
-						else if ( err ) {
-							return next(new Error(
-								'Request for Twitter data has failed:\n' +
-								`On: ${dataUrl}\n` +
-								err.stack
-							))
-						}
-						else if ( !dataResponse.body.users ) {
-							return next(new Error(
-								'Request for Twitter data has failed with no results:\n' +
-								`On: ${dataUrl}\n` +
-								require('util').inspect(dataResponse.body)
-							))
-						}
+			console.log(require('util').inspect(data))
 
-						state.app.log('debug', 'Fetched twitter data')
+			for ( const result of data.users ) {
+				Person.ensure(extendr.extend({
+					twitterId: result.id,
+					twitterName: result.name,
+					twitterUsername: result.screen_name,
+					twitterAvatar: result.profile_image_url,
+					location: result.location,
+					timezone: result.time_zone,
+					bio: result.description
+				}, data)).addSource(`twitter-followed-${twitterUsername}`)
+			}
 
-						for ( const result of dataResponse.body.users ) {
-							Person.ensure(extendr.extend({
-								twitterId: result.id,
-								twitterName: result.name,
-								twitterUsername: result.screen_name,
-								twitterAvatar: result.profile_image_url,
-								location: result.location,
-								timezone: result.time_zone,
-								bio: result.description
-							}, data)).addSource(`twitter-followed-${twitterUsername}`)
-						}
-
-						next()
-					})
-			})
+			next()
+		})
 
 		// Chain
 		return this
 	}
 
 	static loadFromFacebookGroup ({facebookGroupId, data = {}}, next) {
-		const url = `https://graph.facebook.com/v2.4/${facebookGroupId}/members?fields=name,id&limit=9999&access_token=${env.startuphostel.facebookAccessToken}`
-
-		state.app.log('debug', 'Fetching Facebook Group data...')
-
+		const url = `https://graph.facebook.com/v2.4/${facebookGroupId}/members?fields=name,id&limit=9999&access_token=${env.bevry.facebookAccessToken}`
+		state.app.log('debug', 'Fetching Facebook Group data...', facebookGroupId)
 		superagent
 			.get(url)
 			.accept('json')
@@ -362,7 +311,7 @@ module.exports = class Person extends require('fellow') {
 					return next(new Error('Request for Facebook Group data has failed with error:\n' + err.stack))
 				}
 
-				state.app.log('debug', 'Fetched Facebook Group data')
+				state.app.log('debug', 'Fetched Facebook Group data', facebookGroupId)
 
 				for ( const result of dataResponse.body.data ) {
 					Person.ensure(extendr.extend({
