@@ -122,11 +122,16 @@ module.exports = function middleware (req, res, next) {
 				const opts = {
 					campaignMonitorListId: env.docpad.campaignMonitorListId
 				}
-				person.subscribe(opts, function (err) {
-					if ( err )  return res.sendError(err.message, {email: person.email})
-					person.save({}, function (err) {
+				// Wait for ready
+				state.app.ready({}, function (err) {
+					if ( err )  return res.sendError(err)
+					// Ready
+					person.subscribe(opts, function (err) {
 						if ( err )  return res.sendError(err.message, {email: person.email})
-						return res.sendSuccess({email: person.email})
+						person.save({}, function (err) {
+							if ( err )  return res.sendError(err.message, {email: person.email})
+							return res.sendSuccess({email: person.email})
+						})
 					})
 				})
 				break
