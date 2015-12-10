@@ -26,12 +26,16 @@ module.exports = class App {
 		state.app = this
 	}
 
-	ready ({name = 'unknown'}, next) {
+	ready (opts, next) {
 		if ( this._destroyed ) {
-			this.log('warn', new Error(`ready callback for ${name} will not be fired as app has been destroyed`))
+			this.log('warn', new Error(`ready callback for ${opts.name || 'unknown'} will not be fired as app has been destroyed`))
 		}
-		else if ( !this.initialized ) {
-			setTimeout(this.ready.bind(this, {name}, next), READY_DELAY)
+		else if ( !this._setup ) {
+			this.log('debug', new Error(`ready callback for ${opts.name || 'unknown'} waiting as we are not setup yet`))
+			setTimeout(this.ready.bind(this, opts, next), READY_DELAY)
+		}
+		else {
+			next()
 		}
 
 		// Chain

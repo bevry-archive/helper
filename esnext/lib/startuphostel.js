@@ -22,7 +22,7 @@ module.exports = function middleware (req, res, next) {
 		}
 		else {
 			// Wait for ready
-			state.app.ready({}, function (err) {
+			state.app.ready({name: 'startup hostel people'}, function (err) {
 				if ( err )  return res.sendError(err)
 				// Ready
 				state.startuphostel.peopleFetcher.request(function (err) {

@@ -77,12 +77,14 @@ module.exports = function middleware (req, res, next) {
 				}
 
 				// Wait for ready
-				state.app.ready({}, function (err) {
+				state.app.ready({name: 'docpad plugin'}, function (err) {
 					if ( err )  return res.sendError(err)
 					// Ready
+					log('debug', `fetching docpad plugin...`)
 					state.docpad.pluginClerk.fetchPlugin(clerkOptions, function (err, result) {
+						log('debug', `fetched docpad plugin`)
 						if ( err )  return res.sendError(err, clerkOptions)
-						res.res.sendSuccess(result)
+						res.sendSuccess(result)
 					})
 				})
 				break
@@ -93,12 +95,14 @@ module.exports = function middleware (req, res, next) {
 					dependencies: req.body.dependencies
 				}
 				// Wait for ready
-				state.app.ready({}, function (err) {
+				state.app.ready({name: 'docpad plugins'}, function (err) {
 					if ( err )  return res.sendError(err)
 					// Ready
+					log('debug', `fetching docpad plugins...`)
 					state.docpad.pluginClerk.fetchPlugins(clerkOptions, function (err, result) {
+						log('debug', `fetched docpad plugins`)
 						if ( err )  return res.sendError(err, clerkOptions)
-						res.res.sendSuccess(result)
+						res.sendSuccess(result)
 					})
 				})
 				break
@@ -127,7 +131,7 @@ module.exports = function middleware (req, res, next) {
 					campaignMonitorListId: env.docpad.campaignMonitorListId
 				}
 				// Wait for ready
-				state.app.ready({}, function (err) {
+				state.app.ready({name: 'docpad subscriber'}, function (err) {
 					if ( err )  return res.sendError(err)
 					// Ready
 					person.subscribe(opts, function (err) {
@@ -164,21 +168,23 @@ module.exports = function middleware (req, res, next) {
 				req.body.context.ip = req.body.context.ip || ipAddress
 
 				// Wait for ready
-				state.app.ready({}, function (err) {
+				state.app.ready({name: 'docpad analytics'}, function (err) {
 					if ( err )  return res.sendError(err)
 					// Ready
 
 					// Action
 					switch ( req.query.action ) {
 						case 'identify':
+							// do this in the background, send success right away and thus log error instead of sending it
 							state.docpad.analytics.identify(req.body, function (err) {
-								res.sendError(err)
+								if (err)  res.log('error', err)
 							})
 							break
 
 						case 'track':
+							// do this in the background, send success right away and thus log error instead of sending it
 							state.docpad.analytics.track(req.body, function (err) {
-								res.sendError(err)
+								if (err)  res.log('error', err)
 							})
 							break
 
