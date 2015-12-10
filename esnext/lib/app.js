@@ -22,8 +22,12 @@ module.exports = class App {
 		this._logger = null
 		this.db = null
 		this.server = null
-		this.log = console.log
+		this._log = console.log
 		state.app = this
+	}
+
+	log (...args) {
+		return this._log(...args)
 	}
 
 	ready (opts, next) {
@@ -71,7 +75,7 @@ module.exports = class App {
 				const logger = require('caterpillar').createLogger()
 				const human = require('caterpillar-human').createHuman()
 				this._logger = logger.pipe(human).pipe(process.stdout)
-				this.log = logger.log.bind(logger)
+				this._log = logger.log.bind(logger)
 			})
 		}
 

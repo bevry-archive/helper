@@ -22,8 +22,11 @@ module.exports = class Server {
 	}
 
 	constructor (opts) {
-		if ( !opts.log )  throw new Error('No log option was passed to the server constructor')
-		this.log = opts.log
+		this._log = opts.log || console.log
+	}
+
+	log (...args) {
+		return this._log(...args)
 	}
 
 	start (opts, next) {
@@ -50,7 +53,7 @@ module.exports = class Server {
 			res.sendResponse = res.sendResponse || this.sendResponse.bind(this, req, res)
 			res.sendError = res.sendError || this.sendError.bind(this, req, res)
 			res.sendSuccess = res.sendSuccess || this.sendSuccess.bind(this, req, res)
-			res.log = res.log || this.log
+			if ( res.log == null ) res.log = this.log
 			complete()
 		})
 
