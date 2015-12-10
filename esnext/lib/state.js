@@ -4,16 +4,8 @@
 
 // Prepare
 const state = {
-	app: {
-		log: console.log,
-		server: null,
-	},
-	bevry: {
-		db: null
-	},
+	app: null,
 	docpad: {
-		codeRedirectPermanent: 301,
-		codeRedirectTemporary: 302,
 		spamUsers: [
 			'Lonkly',
 			'55c7a10d69feeae52b991ba69e820c29aa1da960',
@@ -30,12 +22,6 @@ const state = {
 		peopleFetcher: null
 	}
 }
-
-// Logging
-const logger = require('caterpillar').createLogger()
-const human = require('caterpillar-human').createHuman()
-logger.pipe(human).pipe(process.stdout)
-state.app.log = logger.log
 
 // Export
 module.exports = state

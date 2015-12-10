@@ -19,16 +19,16 @@ module.exports = class App {
 	constructor () {
 		this._destroyed = false
 		this._setup = false
-	}
-
-	// This gets overwrote in ./state.js
-	log (...args) {
-		console.log(...args)
+		this._logger = null
+		this.db = null
+		this.server = null
+		this.log = console.log
+		state.app = this
 	}
 
 	ready ({name = 'unknown'}, next) {
 		if ( this._destroyed ) {
-			console.log(`ready callback for ${name} will not be fired as app has been destroyed`)
+			this.log('warn', new Error(`ready callback for ${name} will not be fired as app has been destroyed`))
 		}
 		else if ( !this.initialized ) {
 			this.setTimeout(this.ready.bind(this, {name}, next), READY_DELAY)
@@ -62,24 +62,33 @@ module.exports = class App {
 
 		const tasks = new TaskGroup().done(next)
 
-		if ( !state.bevry.db ) {
+		if ( !this._logger ) {
+			tasks.addTask('setup logger', () => {
+				const logger = require('caterpillar').createLogger()
+				const human = require('caterpillar-human').createHuman()
+				this._logger = logger.pipe(human).pipe(process.stdout)
+				this.log = logger.log.bind(logger)
+			})
+		}
+
+		if ( !this.db ) {
 			tasks.addTask('connect to the database', (complete) => {
-				state.app.log('info', 'Connecting to the database...')
+				this.log('info', 'Connecting to the database...')
 				require('mongodb').MongoClient.connect(env.bevry.databaseUrl, (err, db) => {
 					if ( err )  return complete(err)
-					state.bevry.db = db
-					state.app.log('info', 'Connected to the database')
+					this.db = db
+					this.log('info', 'Connected to the database')
 					complete()
 				})
 			})
 		}
 
 		/* eslint camelcase:0 */
-		if ( !state.bevry.twitterClient ) {
-			tasks.addTask('setup twitter api client', function () {
-				state.app.log('info', 'Init Twitter API Client')
+		if ( !this.twitterClient ) {
+			tasks.addTask('setup twitter api client', () => {
+				this.log('info', 'Init Twitter API Client')
 				const Twit = require('twit')
-				state.bevry.twitterClient = new Twit({
+				this.twitterClient = new Twit({
 					consumer_key: env.bevry.twitterConsumerKey,
 					consumer_secret: env.bevry.twitterConsumerSecret,
 					access_token: env.bevry.twitterAccessToken,
@@ -89,27 +98,27 @@ module.exports = class App {
 		}
 
 		if ( !state.docpad.analytics ) {
-			tasks.addTask('setup docpad analytics', function () {
-				state.app.log('info', 'Init DocPad Analytics')
+			tasks.addTask('setup docpad analytics', () => {
+				this.log('info', 'Init DocPad Analytics')
 				const Analytics = require('analytics-node')
 				state.docpad.analytics = new Analytics(env.docpad.segmentKey)
 			})
 		}
 
 		if ( !state.docpad.pluginClerk ) {
-			tasks.addTask('setup docpad plugin clerk', function () {
-				state.app.log('info', 'Init Plugin Clerk')
+			tasks.addTask('setup docpad plugin clerk', () => {
+				this.log('info', 'Init Plugin Clerk')
 				const PluginClerk = require('pluginclerk')
-				state.docpad.pluginClerk = new PluginClerk({log: state.app.log, keyword: 'docpad-plugin', prefix: 'docpad-plugin-'})
+				state.docpad.pluginClerk = new PluginClerk({log: this.log, keyword: 'docpad-plugin', prefix: 'docpad-plugin-'})
 			})
 		}
 
-		if ( !state.app.peopleFetcher ) {
-			tasks.addTask('setup people fetcher and fetch people', function (complete) {
-				state.app.log('info', 'Initialising people fetcher...')
-				state.app.peopleFetcher = require('./people-fetcher')({log: state.app.log})
-				state.app.peopleFetcher.request(function (...args) {
-					state.app.log('info', 'Initialized people fetcher')
+		if ( !state.startuphostel.peopleFetcher ) {
+			tasks.addTask('setup people fetcher and fetch people', (complete) => {
+				this.log('info', 'Initialising people fetcher...')
+				state.startuphostel.peopleFetcher = require('./people-fetcher')({log: state.app.log})
+				state.startuphostel.peopleFetcher.request((...args) => {
+					this.log('info', 'Initialized people fetcher')
 					complete(...args)
 				})
 			})
@@ -136,21 +145,21 @@ module.exports = class App {
 
 		const tasks = new TaskGroup().done(next)
 
-		if ( state.bevry.db ) {
-			tasks.addTask('shutdown database', function (complete) {
-				state.bevry.db.close(false, function (err) {
+		if ( this.db ) {
+			tasks.addTask('shutdown database', (complete) => {
+				this.db.close(false, (err) => {
 					if ( err )  return complete(err)
-					state.bevry.db = null
+					this.db = null
 					complete()
 				})
 			})
 		}
 
 		if ( state.app.server ) {
-			tasks.addTask('shutdown the server', function (complete) {
-				state.app.server.destroy(opts, function (err) {
+			tasks.addTask('shutdown the server', (complete) => {
+				this.server.destroy(opts, (err) => {
 					if ( err )  return complete(err)
-					state.app.server = null
+					this.server = null
 					complete()
 				})
 			})

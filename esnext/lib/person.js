@@ -132,7 +132,7 @@ module.exports = class Person extends require('fellow') {
 		}
 
 		state.app.log('debug', `Saving ${this.displayName} to database...`)
-		state.bevry.db.collection('users').updateOne(filter, update, options, (err, response) => {
+		state.app.db.collection('users').updateOne(filter, update, options, (err, response) => {
 			if ( err )  return next(err)
 			state.app.log('debug', `Saved ${this.displayName} to database`, response.result)
 			// console.log(result)
@@ -160,13 +160,10 @@ module.exports = class Person extends require('fellow') {
 
 	static loadFromDatabase (opts, next) {
 		state.app.log('debug', 'Fetching database data...')
-		state.bevry.db.collection('users').find({}).toArray((err, result) => {
+		state.app.db.collection('users').find({}).toArray((err, result) => {
 			if ( err )  return next(err)
-
 			state.app.log('debug', 'Fetched database data')
-
 			Person.add(result)
-
 			next()
 		})
 
@@ -257,7 +254,7 @@ module.exports = class Person extends require('fellow') {
 	static loadFromTwitter ({twitterUsername, data = {}}, next) {
 		/* eslint camelcase:0 */
 		state.app.log('debug', 'Fetching twitter data...', twitterUsername)
-		state.bevry.twitterClient.get('followers/list', {screen_name: twitterUsername}, function (err, data) {
+		state.app.twitterClient.get('followers/list', {screen_name: twitterUsername}, function (err, data) {
 			if (err) {
 				return next(new Error(
 					'Request for Twitter data has failed with error:\n' + err.stack

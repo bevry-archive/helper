@@ -6,6 +6,10 @@ const semver = require('semver')
 const env = require('./env')
 const state = require('./state')
 
+// Prepare
+const HTTP_REDIRECT_PERMANENT = 301
+// const HTTP_REDIRECT_TEMPORARY = 302
+
 // Middleware
 module.exports = function middleware (req, res, next) {
 	// Prepare
@@ -61,7 +65,7 @@ module.exports = function middleware (req, res, next) {
 
 				url = `http://raw.githubusercontent.com/bevry/docpad-extras/${branch}/exchange.${extension}`
 				log('debug', `Redirecting skeletons for ${req.query.version} to ${url}`)
-				res.writeHead(state.docpad.codeRedirectPermanent, {Location: url})
+				res.writeHead(HTTP_REDIRECT_PERMANENT, {Location: url})
 				res.end()
 				break
 
@@ -102,7 +106,7 @@ module.exports = function middleware (req, res, next) {
 			// Latest
 			case 'latest':
 				url = 'http://raw.githubusercontent.com/bevry/docpad/master/package.json'
-				res.writeHead(state.docpad.codeRedirectPermanent, {Location: url})
+				res.writeHead(HTTP_REDIRECT_PERMANENT, {Location: url})
 				res.end()
 				break
 
@@ -167,11 +171,15 @@ module.exports = function middleware (req, res, next) {
 					// Action
 					switch ( req.query.action ) {
 						case 'identify':
-							state.docpad.analytics.identify(req.body, res.sendError)
+							state.docpad.analytics.identify(req.body, function (err) {
+								res.sendError(err)
+							})
 							break
 
 						case 'track':
-							state.docpad.analytics.track(req.body, res.sendError)
+							state.docpad.analytics.track(req.body, function (err) {
+								res.sendError(err)
+							})
 							break
 
 						default:
@@ -183,15 +191,16 @@ module.exports = function middleware (req, res, next) {
 				})
 				break
 
-			// Unknown method, continue
 			default:
-				res.sendError('unknown method')
+				// Forward onto the next helper
+				next()
 				break
 		}
 	}
 
-	// No method at all, so 404 by continuing with the helper
+	// No method
 	else {
-		return next()
+		// Forward onto the next helper
+		next()
 	}
 }
