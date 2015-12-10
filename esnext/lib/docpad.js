@@ -60,7 +60,7 @@ module.exports = function middleware (req, res, next) {
 					}
 				}
 				else {
-					return res.sendError('Unknown DocPad version', {version})
+					return res.sendError(new Error('unknown DocPad version'), {version})
 				}
 
 				url = `http://raw.githubusercontent.com/bevry/docpad-extras/${branch}/exchange.${extension}`
@@ -149,7 +149,7 @@ module.exports = function middleware (req, res, next) {
 			case 'analytics':
 				// Check body
 				if ( Object.keys(req.body).length === 0 ) {
-					return res.sendError('missing body', req.body)
+					return res.sendError(new Error('missing body'), req.body)
 				}
 
 				// No user
@@ -160,7 +160,7 @@ module.exports = function middleware (req, res, next) {
 
 				// Check user
 				else if ( state.docpad.spamUsers.indexOf(req.body.userId) !== -1 ) {
-					return res.sendError('spam user')
+					return res.sendError(new Error('spam user'))
 				}
 
 				// Adjust params
@@ -189,7 +189,7 @@ module.exports = function middleware (req, res, next) {
 							break
 
 						default:
-							return res.sendError('unknown action')
+							return res.sendError(new Error('unknown action'))
 					}
 
 					// Send response back to client

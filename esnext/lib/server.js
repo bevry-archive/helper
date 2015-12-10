@@ -136,7 +136,7 @@ module.exports = class Server {
 		}, data || {})
 
 		// Send error
-		this.log('warn', 'error details:', err.stack)
+		if ( err.stack )  this.log('warn', 'error details:', err.stack)
 		return res.sendResponse(responseData, code)
 	}
 
