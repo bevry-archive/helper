@@ -273,8 +273,6 @@ module.exports = class Person extends require('fellow') {
 
 			state.app.log('debug', 'Fetched twitter data', twitterUsername)
 
-			console.log(require('util').inspect(data))
-
 			for ( const result of data.users ) {
 				Person.ensure(extendr.extend({
 					twitterId: result.id,
