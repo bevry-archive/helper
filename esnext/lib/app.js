@@ -13,6 +13,10 @@ module.exports = class App {
 		return new this(...args)
 	}
 
+	log (...args) {
+		state.app.log(...args)
+	}
+
 	init (opts, next) {
 		if ( this.destroyed )  return next(new Error('Init failed as Application has been destroyed'))
 

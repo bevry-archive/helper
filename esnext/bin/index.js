@@ -39,6 +39,9 @@ server.start({
 						process.exit(EXIT_ERROR_CODE)
 						return
 					}
+
+					// Success
+					app.log('info', 'successfully started the application')
 				})
 			})
 		})
