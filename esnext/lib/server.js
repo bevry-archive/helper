@@ -109,8 +109,11 @@ module.exports = class Server {
 			: JSON.stringify(data)
 
 		// Log
-		const level = code === HTTP_OK ? 'info' : 'warning'
-		this.log(level, `${code} response:`, str)
+		// But don't log if on travis as it may output sensitive information
+		if ( !Boolean(process.env.TRAVIS_NODE_VERSION) ) {
+			const level = code === HTTP_OK ? 'info' : 'warning'
+			this.log(level, `${code} response:`, str)
+		}
 
 		// Flush
 		res.write(str)
