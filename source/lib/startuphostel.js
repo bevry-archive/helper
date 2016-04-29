@@ -1,5 +1,3 @@
-'use strict'
-
 // Imports
 const env = require('./env')
 const state = require('./state')

@@ -1,5 +1,4 @@
 // @TODO add wufoo result fetching
-'use strict'
 
 // Imports
 const Person = require('./person')
@@ -95,21 +94,6 @@ module.exports = function (opts) {
 				docpadUser: true
 			}
 		}))
-
-		tasks.addTask('load startuphostel facebook group members', function (complete) {
-			log('info', 'Loading people from facebook group...')
-			const opts = {
-				facebookGroupId: env.startuphostel.facebookGroupId,
-				data: {
-					startupHostelUser: true
-				}
-			}
-			Person.loadFromFacebookGroup(opts, function (err) {
-				if ( err )  return complete(err)
-				log('info', 'Loaded people from facebook group')
-				complete()
-			})
-		})
 
 		/*
 		// Log who our people are

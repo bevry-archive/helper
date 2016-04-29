@@ -1,5 +1,3 @@
-'use strict'
-
 // Imports
 const Person = require('./person')
 const semver = require('semver')
@@ -80,9 +78,9 @@ module.exports = function middleware (req, res, next) {
 				state.app.ready({name: 'docpad plugin'}, function (err) {
 					if ( err )  return res.sendError(err)
 					// Ready
-					log('debug', `fetching docpad plugin...`)
+					log('debug', 'fetching docpad plugin...')
 					state.docpad.pluginClerk.fetchPlugin(clerkOptions, function (err, result) {
-						log('debug', `fetched docpad plugin`)
+						log('debug', 'fetched docpad plugin')
 						if ( err )  return res.sendError(err, clerkOptions)
 						res.sendSuccess(result)
 					})
@@ -98,9 +96,9 @@ module.exports = function middleware (req, res, next) {
 				state.app.ready({name: 'docpad plugins'}, function (err) {
 					if ( err )  return res.sendError(err)
 					// Ready
-					log('debug', `fetching docpad plugins...`)
+					log('debug', 'fetching docpad plugins...')
 					state.docpad.pluginClerk.fetchPlugins(clerkOptions, function (err, result) {
-						log('debug', `fetched docpad plugins`)
+						log('debug', 'fetched docpad plugins')
 						if ( err )  return res.sendError(err, clerkOptions)
 						res.sendSuccess(result)
 					})

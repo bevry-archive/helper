@@ -1,6 +1,5 @@
 /* eslint no-console:0 */
 // @TODO move this into the app class instance somehow so it is not a singleton, as singleton comes into issue with database and server closing
-'use strict'
 
 // Prepare
 const state = {

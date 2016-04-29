@@ -1,5 +1,3 @@
-'use strict'
-
 // Imports
 const eachr = require('eachr')
 

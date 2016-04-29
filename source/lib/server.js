@@ -1,6 +1,4 @@
-/* eslint no-console:0, no-magic-numbers:0, prefer-reflect:0, max-params:0 */
-'use strict'
-
+/* eslint no-console:0, max-params:0 */
 // Import
 const extendr = require('extendr')
 const urlUtil = require('url')
@@ -114,7 +112,7 @@ module.exports = class Server {
 
 		// Log
 		// But don't log if on travis as it may output sensitive information
-		if ( !Boolean(process.env.TRAVIS_NODE_VERSION) ) {
+		if ( !process.env.TRAVIS_NODE_VERSION ) {
 			const level = code === HTTP_OK ? 'info' : 'warning'
 			this.log(level, `${code} response:`, str)
 		}

@@ -1,6 +1,4 @@
-/* eslint no-console:0, prefer-reflect:0 */
-'use strict'
-
+/* eslint no-console:0 */
 const uuid = require('uuid')
 const superagent = require('superagent')
 const extendr = require('extendr')
@@ -284,39 +282,6 @@ module.exports = class Person extends require('fellow') {
 
 			next()
 		})
-
-		// Chain
-		return this
-	}
-
-	static loadFromFacebookGroup ({facebookGroupId, data = {}}, next) {
-		const url = `https://graph.facebook.com/v2.4/${facebookGroupId}/members?fields=name,id&limit=9999&access_token=${env.bevry.facebookAccessToken}`
-		state.app.log('debug', 'Fetching Facebook Group data...', facebookGroupId)
-		superagent
-			.get(url)
-			.accept('json')
-			.end(function (err, dataResponse) {
-				if ( dataResponse && dataResponse.body.error ) {
-					return next(new Error(
-						'Request for Facebook Group data has failed with returned error:\n' +
-						require('util').inspect(dataResponse.body.error)
-					))
-				}
-				else if ( err ) {
-					return next(new Error('Request for Facebook Group data has failed with error:\n' + err.stack))
-				}
-
-				state.app.log('debug', 'Fetched Facebook Group data', facebookGroupId)
-
-				for ( const result of dataResponse.body.data ) {
-					Person.ensure(extendr.extend({
-						facebookName: result.name,
-						facebookId: result.id
-					}, data)).addSource(`facebook-group-${facebookGroupId}`)
-				}
-
-				next()
-			})
 
 		// Chain
 		return this

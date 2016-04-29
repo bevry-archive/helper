@@ -1,5 +1,4 @@
 /* eslint consistent-this:0 */
-'use strict'
 
 // Imports
 const TaskGroup = require('taskgroup')

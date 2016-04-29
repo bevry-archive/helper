@@ -1,6 +1,4 @@
-/* eslint no-console:0, no-magic-numbers:0 */
-'use strict'
-
+/* eslint no-console:0 */
 // Import
 const joe = require('joe')
 const assert = require('assert-helpers')
