@@ -98,7 +98,7 @@
     "release:push": "git push origin master && git push origin --tags",
     "pretest": "npm run test:eslint",
     "test:eslint": "eslint ./source",
-    "test": "node --harmony ./source/bin/index.js",
-    "start": "node --harmony ./source/test/index.js"
+    "test": "node --harmony ./source/test/index.js",
+    "start": "node --harmony ./source/bin/index.js"
   }
 }
