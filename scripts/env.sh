@@ -1,15 +1,15 @@
 #!/bin/bash
 
 export envfile
-export travis
+export admin
 
 envfile="$(pwd)/.env"
-if test "travis" = "$1"; then
-	echo "Performing travis configuration too"
-	travis="yes"
+if test "admin" = "$1"; then
+	echo "Performing admin configuration too"
+	admin="yes"
 else
-	echo "Skipping travis configuration"
-	travis="no"
+	echo "Skipping remove configuration"
+	admin="no"
 fi
 
 function check {
@@ -36,11 +36,19 @@ function addToTravis {
 	travis env set "$key" "$val" --no-interactive || exit -1
 }
 
+function addToHeroku {
+	local key="$1"
+	local val="${!key}"
+	echo "Adding $key to heroku"
+	heroku config:set "$key=$val" || exit -1
+}
+
 function handle {
 	check $1
 	addToEnvFile $1 $envfile
-	if test "yes" = "$travis"; then
+	if test "yes" = "$admin"; then
 		addToTravis $1
+		addToHeroku $1
 	fi
 	echo -e ""
 }

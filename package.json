@@ -2,7 +2,7 @@
   "title": "Bevry Helper Service",
   "name": "bevry-helper-service",
   "private": true,
-  "version": "3.2.0",
+  "version": "3.2.1",
   "description": "A helper service that assists many of the bevry eco-system functions",
   "homepage": "https://github.com/bevry/helper",
   "license": "MIT",
@@ -107,7 +107,8 @@
     "our:release:push": "git push origin master && git push origin --tags",
     "test": "node --harmony ./source/test/index.js --joe-reporter=console",
     "start": "node --harmony ./source/bin/index.js",
-    "deploy": "./scripts/env.sh && now -C -E ./.env",
-    "configure": "./scripts/env.sh"
+    "deploy": "./scripts/env.sh && now -C -E ./.env -n bevry-helper",
+    "configure": "./scripts/env.sh",
+    "configure:admin": "./scripts/env.sh admin"
   }
 }

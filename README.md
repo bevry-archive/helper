@@ -35,7 +35,7 @@ A helper service that assists many of the bevry eco-system functions
 git clone https://github.com/bevry/helper.git
 cd helper
 npm run our:setup
-npm run configure
+npm run configure  # or use `npm run configure:admin` if you are an admin
 npm test
 npm run our:release
 ```

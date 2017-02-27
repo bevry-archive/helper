@@ -1,5 +1,8 @@
 # History
 
+## v3.2.1 2017 February 27
+- Re-added heroku support as it seems now.sh is not ready
+
 ## v3.2.0 2017 February 27
 - Updated base files
 - Updated dependencies
