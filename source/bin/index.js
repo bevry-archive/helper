@@ -1,4 +1,6 @@
 /* eslint no-console:0 */
+'use strict'
+
 const EXIT_ERROR_CODE = 1
 const app = require('../lib/app').create()
 

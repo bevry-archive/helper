@@ -1,7 +1,8 @@
 /* eslint consistent-this:0 */
+'use strict'
 
 // Imports
-const TaskGroup = require('taskgroup')
+const {TaskGroup} = require('taskgroup')
 const Server = require('./server')
 const env = require('./env')
 const state = require('./state')
@@ -49,7 +50,7 @@ module.exports = class App {
 	start (opts, next) {
 		if ( this._destroyed )  return next(new Error('Start failed as Application has been destroyed'))
 
-		const tasks = new TaskGroup().done(next)
+		const tasks = TaskGroup.create().done(next)
 
 		tasks.addTask((complete) => {
 			this.listen(opts, complete)
@@ -68,13 +69,14 @@ module.exports = class App {
 	setup (opts, next) {
 		if ( this._destroyed )  return next(new Error('Setup failed as Application has been destroyed'))
 
-		const tasks = new TaskGroup().done(next)
+		const tasks = TaskGroup.create().done(next)
 
 		if ( !this._logger ) {
 			tasks.addTask('setup logger', () => {
-				const logger = require('caterpillar').createLogger()
-				const human = require('caterpillar-human').createHuman()
-				this._logger = logger.pipe(human).pipe(process.stdout)
+				const logger = require('caterpillar').create({level: env.app.logLevel})
+				const filter = require('caterpillar-filter').create()
+				const human = require('caterpillar-human').create()
+				this._logger = logger.pipe(filter).pipe(human).pipe(process.stdout)
 				this._log = logger.log.bind(logger)
 			})
 		}
@@ -151,7 +153,7 @@ module.exports = class App {
 	destroy (opts, next) {
 		this._destroyed = true
 
-		const tasks = new TaskGroup().done(next)
+		const tasks = TaskGroup.create().done(next)
 
 		if ( this.db ) {
 			tasks.addTask('shutdown database', (complete) => {

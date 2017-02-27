@@ -1,8 +1,11 @@
+'use strict'
+
 // Imports
 const eachr = require('eachr')
 
 // Prepare
 const env = {
+	app: {},
 	bevry: {
 		campaignMonitorKey: 'BEVRY_CM_KEY',
 		databaseUrl: 'BEVRY_DATABASE_URL',
@@ -31,6 +34,8 @@ eachr(env, function (group) {
 	})
 })
 
+// Custom
+env.app.logLevel = process.env.TRAVIS ? 6 : 7
 
 // Export
 module.exports = env

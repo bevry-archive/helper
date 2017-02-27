@@ -1,5 +1,11 @@
 # History
 
+## v3.2.0 2017 February 27
+- Updated base files
+- Updated dependencies
+- Updated deployment workflow for now.sh
+- Added log filtering to prevent sentitive information from being logged on Travis CI
+
 ## v3.1.0 2016 April 30
 - Updated for node v6, removed need for babel
 

@@ -1,4 +1,6 @@
 /* eslint no-console:0 */
+'use strict'
+
 const uuid = require('uuid')
 const superagent = require('superagent')
 const extendr = require('extendr')

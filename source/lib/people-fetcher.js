@@ -1,4 +1,5 @@
 // @TODO add wufoo result fetching
+'use strict'
 
 // Imports
 const Person = require('./person')
@@ -11,7 +12,7 @@ module.exports = function (opts) {
 
 	function fetchPeople (next) {
 		// Prepare
-		const tasks = require('taskgroup').create().done(function (err) {
+		const tasks = require('taskgroup').TaskGroup.create().done(function (err) {
 			if ( err )  return next(err)
 			next(null, 'fetched')
 		})

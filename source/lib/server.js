@@ -1,4 +1,6 @@
 /* eslint no-console:0, max-params:0 */
+'use strict'
+
 // Import
 const extendr = require('extendr')
 const urlUtil = require('url')

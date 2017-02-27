@@ -1,37 +1,92 @@
+# 2017 February 24
+# https://github.com/bevry/base
+
+
 # Use the latest travis infrastructure
 sudo: false
 
-# We use node
+
+# Complete Node.js Version Matrix
+# https://github.com/balupton/awesome-travis#complete-nodejs-version-matrix
 language: node_js
 node_js:
-  - "6"
+  - "6"     # lts
+matrix:
+  fast_finish: true
 cache:
   directories:
-    - node_modules
+    - $HOME/.npm  # npm's cache
 
-# Prepare our tests
-# Ensure the project is setup correctly and compiled
-install: "npm run-script setup"
 
-# Run our tests
-script: "npm test"
+install: |
+  # Ensure NPM is latest
+  # https://github.com/balupton/awesome-travis#ensure-npm-is-latest
+  export CURRENT_NPM_VERSION="$(npm --version)"
+  export LATEST_NPM_VERSION="$(npm view npm version)"
+  if test "$CURRENT_NPM_VERSION" != "$LATEST_NPM_VERSION"; then
+    echo "running an old npm version, upgrading npm..."
+    npm install npm --global --cache-min=Infinity
+    echo "...npm upgrade complete"
+  fi
+  # Ensure dependencies install with a LTS node version
+  # https://github.com/balupton/awesome-travis#use-lts-node-version-for-preparation
+  export CURRENT_NODE_VERSION="$(node --version)"
+  export LTS_NODE_VERSIONS="$(nvm ls-remote --lts)"
+  if echo "$LTS_NODE_VERSIONS" | grep "$CURRENT_NODE_VERSION"; then
+    echo "running on a LTS node version, completing setup..."
+    npm run our:setup
+    echo "...setup complete with current LTS version"
+  else
+    echo "running on a non-LTS node version, completing setup on a LTS node version..."
+    nvm install --lts
+    export LTS_NODE_INSTALLED_VERSION="$(node --version)"
+    npm run our:setup
+    nvm use "$TRAVIS_NODE_VERSION"
+    echo "...setup complete with LTS"
+  fi
 
-# Custom notifications
+
+before_script: |
+  # Ensure compilation and linting occur on a LTS node version
+  # https://github.com/balupton/awesome-travis#use-lts-node-version-for-preparation
+  if test "$LTS_NODE_INSTALLED_VERSION"; then
+    echo "running on a non-LTS node version, compiling with LTS, skipping linting..."
+    nvm use "$LTS_NODE_INSTALLED_VERSION"
+    npm run our:compile
+    nvm use "$TRAVIS_NODE_VERSION"
+    echo "...compiled"
+  else
+    echo "running on a LTS node version, compiling and linting..."
+    npm run our:compile && npm run our:verify
+    echo "...compiled and linted"
+  fi
+
+
+after_success: |
+  # Release to Now
+  export CURRENT_NODE_VERSION="$(node --version)"
+  export LTS_NODE_LATEST_VERSION="$(nvm version-remote --lts)"
+  if test "$CURRENT_NODE_VERSION" = "$LTS_NODE_LATEST_VERSION"; then
+    if test "$TRAVIS_TAG"; then
+      echo "Releasing to now..."
+      npm run deploy
+      echo "...released to now"
+    else
+      echo "non-tag, no need for release to now"
+    fi
+  else
+    echo "running on non-latest LTS node version, skipping release"
+  fi
+
+
+# ========================================
+# Custom Configuration
+
+# https://github.com/balupton/awesome-travis#slack
+# https://github.com/balupton/awesome-travis#email
 notifications:
   slack:
     secure: ksueP2XJIKgz3t7Q14r6+ISi2Md116VlcCifEZ/lY0HAqcKw7CorRAAvfNHQhy35YWbp6LUm+BApnuEq5hF01cU7g9bsYvhNM3hUv6uWHnbJ8GTyu5J4Y2lm4t6vG230yG4b3cXpzRiqFCu5OgAyIOGMwIUuo4ePq9EYMoe3DfQ=
   email:
     recipients:
       secure: g5Kn+WSbZ1/aHSTY2n39w6/njST70ANZJ37sNxYQMiRlpdjNbDcVbTEDw3GGSt4u413iy9vs8z3IhwzGKl8pNPJW1lQ0TrQf8mHmV+moqX0p4GesTtRaIdR2Gs8KUsxV76aFEYCMy6dDwz+y9qXgOZURjRlpmpETw9Hr7XWUSiQ=
-
-# Custom Env
-# travis env set BEVRY_CM_KEY $BEVRY_CM_KEY
-# travis env set BEVRY_DATABASE_URL $BEVRY_DATABASE_STAGING_URL
-# travis env set BEVRY_TWITTER_CONSUMER_KEY $BEVRY_TWITTER_CONSUMER_KEY
-# travis env set BEVRY_TWITTER_CONSUMER_SECRET $BEVRY_TWITTER_CONSUMER_SECRET
-# travis env set TWITTER_ACCESS_TOKEN $TWITTER_ACCESS_TOKEN
-# travis env set TWITTER_ACCESS_TOKEN_SECRET $TWITTER_ACCESS_TOKEN_SECRET
-# travis env set DP_CM_LIST_ID $DP_CM_LIST_ID
-# travis env set DP_SEGMENT_KEY $DP_SEGMENT_KEY
-# travis env set SH_CM_LIST_ID $SH_CM_LIST_ID
-# travis env set SH_API_KEY $SH_API_KEY

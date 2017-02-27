@@ -1,3 +1,5 @@
+'use strict'
+
 // Imports
 const Person = require('./person')
 const semver = require('semver')
