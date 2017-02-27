@@ -65,4 +65,13 @@ handle DP_SEGMENT_KEY
 handle SH_CM_LIST_ID
 handle SH_API_KEY
 handle NOW_TOKEN
+
+
+if test "yes" = "$admin"; then
+	echo "Configuring heroku..."
+	heroku domains:add helper.bevry.me
+	heroku domains:add helper.docpad.org
+	heroku domains:add helper.startuphostel.org
+fi
+
 echo "All done successfully"
