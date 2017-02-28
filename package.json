@@ -74,7 +74,7 @@
     "our:release:tag": "export MESSAGE=$(cat ./HISTORY.md | sed -n \"/## v$npm_package_version/,/##/p\" | sed 's/## //' | awk 'NR>1{print buf}{buf = $0}') && test \"$MESSAGE\" || (echo 'proper changelog entry not found' && exit -1) && git tag v$npm_package_version -am \"$MESSAGE\"",
     "our:release:push": "git push origin master && git push origin --tags",
     "test": "node --harmony ./source/test/index.js --joe-reporter=console",
-    "start": "node --harmony ./source/app/index.js",
+    "start": "node --harmony ./source/app/bin.js",
     "deploy": "echo 'no need for deployment'",
     "deploy:now": "now -C -E ./.env -n bevry-helper",
     "configure": "./scripts/env.sh",
