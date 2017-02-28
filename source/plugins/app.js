@@ -7,7 +7,7 @@ const CaterpillarHuman = require('caterpillar-human')
 class CaterpillarClean extends Caterpillar.Transform {
 	/* eslint class-methods-use-this: 0*/
 	format (message) {
-		return message.replace(/(key|secret)=[a-z0-9]+/gi, '$1=SECRET_KEY_REMOVED_BY_CATERPILLAR_CLEAN')
+		return message.replace(/(client_id|clientid|key|secret)=[a-z0-9]+/gi, '$1=SECRET_REMOVED_BY_CATERPILLAR_CLEAN')
 	}
 }
 

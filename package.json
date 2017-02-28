@@ -94,7 +94,7 @@
     "extendr": "^3.2.2",
     "extract-opts": "^3.3.1",
     "fellow": "^2.3.0",
-    "getcontributors": "^1.4.4",
+    "getcontributors": "^1.4.5",
     "hostenv": "^1.0.5",
     "mongodb": "^2.2.24",
     "pluginclerk": "^1.2.0",
