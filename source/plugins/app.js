@@ -1,15 +1,27 @@
 'use strict'
 
+const Caterpillar = require('caterpillar')
+const CaterpillarFilter = require('caterpillar-filter')
+const CaterpillarHuman = require('caterpillar-human')
+
+class CaterpillarClean extends Caterpillar.Transform {
+	/* eslint class-methods-use-this: 0*/
+	format (message) {
+		return message.replace(/(key|secret)=[a-z0-9]+/gi, '$1=SECRET_KEY_REMOVED_BY_CATERPILLAR_CLEAN')
+	}
+}
+
 const Server = require('../lib/server')
 const env = require('../env')
 
 function initLogger () {
 	const {state} = this
-	const logger = require('caterpillar').create({level: env.app.logLevel})
-	const filter = require('caterpillar-filter').create()
-	const human = require('caterpillar-human').create()
+	const logger = Caterpillar.create({level: env.app.logLevel})
+	const filter = CaterpillarFilter.create()
+	const human = CaterpillarHuman.create()
+	const clean = CaterpillarClean.create()
 	state.app.logger = logger
-	logger.pipe(filter).pipe(human).pipe(process.stdout)
+	logger.pipe(filter).pipe(human).pipe(clean).pipe(process.stdout)
 }
 initLogger.priority = 100
 
