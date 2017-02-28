@@ -4,9 +4,10 @@
 // Import
 const joe = require('joe')
 const assert = require('assert-helpers')
-const superagent = require('superagent')
+const request = require('superagent')
 
 // Prepare
+const HTTP_NOT_FOUND = 404
 const HTTP_OK = 200
 
 // Task
@@ -24,9 +25,19 @@ joe.suite('contributors-helper', function (suite, test) {
 			})
 	})
 
+	test('should send 404 correctly', function (done) {
+		const url = `${serverURL}`
+		request.get(url).end(function (error, res) {
+			assert.errorEqual(error, 'Not Found', 'error')
+			assert.equal(res.statusCode, HTTP_NOT_FOUND, 'status code')
+			assert.deepEqual(res.body, { success: false, error: '404 Not Found' }, 'body')
+			done()
+		})
+	})
+
 	test('should fetch contributors correctly', function (done) {
 		const url = `${serverURL}?method=contributors&users=browserstate`
-		superagent.get(url).end(function (error, res) {
+		request.get(url).end(function (error, res) {
 			assert.errorEqual(error, null, 'error')
 			assert.equal(res.statusCode, HTTP_OK, `status code, res: ${res.text}`)
 			assert.equal(JSON.parse(res.text).success, true, `latest contributors were successfully fetched, res: ${res.text}`)

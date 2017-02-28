@@ -54,7 +54,7 @@ joe.suite('server', function (suite, test) {
 	test('should send 404 correctly', function (done) {
 		const url = `${serverURL}`
 		request.get(url).end(function (error, res) {
-			assert.errorEqual(error, null, 'error')
+			assert.errorEqual(error, 'Not Found', 'error')
 			assert.equal(res.statusCode, HTTP_NOT_FOUND, 'status code')
 			assert.deepEqual(res.body, { success: false, error: '404 Not Found' }, 'body')
 			done()
