@@ -6,7 +6,7 @@ const superagent = require('superagent')
 const extendr = require('extendr')
 const eachr = require('eachr')
 const Cachely = require('cachely')
-const {TaskGroup} = require('TaskGroup')
+const {TaskGroup} = require('taskgroup')
 const Fellow = require('fellow')
 const env = require('../env')
 
