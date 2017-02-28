@@ -28,8 +28,8 @@ joe.suite('contributors-helper', function (suite, test) {
 		const url = `${serverURL}?method=contributors&users=browserstate`
 		superagent.get(url).end(function (error, res) {
 			assert.errorEqual(error, null, 'error')
-			assert.equal(res.statusCode, HTTP_OK, 'status code')
-			assert.equal(JSON.parse(res.text).success, true, 'latest contributors were successfully fetched')
+			assert.equal(res.statusCode, HTTP_OK, `status code, res: ${res.text}`)
+			assert.equal(JSON.parse(res.text).success, true, `latest contributors were successfully fetched, res: ${res.text}`)
 			done()
 		})
 	})
