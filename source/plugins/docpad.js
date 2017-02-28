@@ -11,19 +11,24 @@ const HTTP_REDIRECT_PERMANENT = 301
 // const HTTP_REDIRECT_TEMPORARY = 302
 
 // Init
-function initAnalytics () {
+function initDocPad () {
 	const {state, log} = this
+
+	// analytics
 	log('info', 'init docpad analytics')
 	state.docpad.analytics = new Analytics(env.docpad.segmentKey)
-}
-function initClerk () {
-	const {state, log} = this
+
+	// clerk
 	log('info', 'init docpad plugin clerk')
 	state.docpad.pluginClerk = new PluginClerk({
 		log,
 		keyword: 'docpad-plugin',
 		prefix: 'docpad-plugin-'
 	})
+
+	// ready
+	state.docpad.ready = true
+	this.emit('docpad-ready')
 }
 
 // Middleware
@@ -33,8 +38,15 @@ function middleware (req, res, next) {
 	const log = res.log
 	const ipAddress = req.headers['X-Forwarded-For'] || req.connection.remoteAddress
 
+	// Waiting
+	if ( state.docpad.ready === false ) {
+		log('info', 'docpad: waiting for ready for request:', req.url, req.query, req.body)
+		this.on('docpad-ready', () => middleware.call(this, req, res, next))
+		return
+	}
+
 	// Log
-	log('info', 'docpad: received request:', req.url, req.query, req.body)
+	log('info', 'docpad: processing request:', req.url, req.query, req.body)
 
 	// Alias http://helper.docpad.org/exchange.blah?version=6.32.0 to http://helper.docpad.org/?method=exchange&version=6.32.0
 	if ( req.url.indexOf('exchange') !== -1 ) {
@@ -215,11 +227,11 @@ function middleware (req, res, next) {
 // Register
 module.exports = function () {
 	this.state.docpad = {
-		analytics: null
+		analytics: null,
+		ready: false
 	}
-	this.on('init', initAnalytics)
-	this.on('init', initClerk)
-	this.on('init', () => {
-		this.state.app.middlewares.push(middleware.bind(this))
+	this.on('init', initDocPad)
+	this.on('register-middleware', ({middlewares}) => {
+		middlewares.push(middleware.bind(this))
 	})
 }

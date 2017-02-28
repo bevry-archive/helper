@@ -29,18 +29,21 @@ initLogger.priority = 100
 function initServer (next) {
 	const {state, log} = this
 	state.app.server = Server.create({log})
-
-	state.app.server.start({
-		middlewares: state.app.middlewares,
-		next (err, connect, server) {
-			if ( err )  return next(err, connect, server)
-			const address = server.address()
-			state.app.serverURL = `http://${address.address}:${address.port}`
-			return next(null, connect, server)
-		}
+	const {server, middlewares} = state.app
+	this.emitSerial('register-middleware', {middlewares}, function (err) {
+		if ( err )  return next(err)
+		server.start({
+			middlewares,
+			next (err, connect, server) {
+				if ( err )  return next(err)
+				const address = server.address()
+				state.app.serverURL = `http://${address.address}:${address.port}`
+				return next()
+			}
+		})
 	})
 }
-initServer.priority = -100
+initServer.priority = 100
 
 
 function deinitServer (complete) {
@@ -53,7 +56,7 @@ function deinitServer (complete) {
 		complete()
 	})
 }
-deinitServer.priority = 100
+deinitServer.priority = -100
 
 
 module.exports = function () {

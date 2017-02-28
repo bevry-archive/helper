@@ -16,6 +16,7 @@ function initTwitter () {
 		access_token_secret: env.bevry.twitterAccessTokenSecret
 	})
 }
+initTwitter.priority = 50
 
 function initDatabase (complete) {
 	const {state, log} = this
@@ -27,6 +28,7 @@ function initDatabase (complete) {
 		complete()
 	})
 }
+initDatabase.priority = 50
 
 function deinitDatabase (complete) {
 	const {state, log} = this
@@ -38,6 +40,7 @@ function deinitDatabase (complete) {
 		complete()
 	})
 }
+deinitDatabase.priority = -50
 
 module.exports = function () {
 	const app = this

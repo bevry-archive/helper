@@ -51,7 +51,7 @@ module.exports = function () {
 		getter: null
 	}
 	this.on('init', initGetter)
-	this.on('init', () => {
-		this.state.app.middlewares.push(middleware.bind(this))
+	this.on('register-middleware', ({middlewares}) => {
+		middlewares.push(middleware.bind(this))
 	})
 }
