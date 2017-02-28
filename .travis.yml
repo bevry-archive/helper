@@ -21,27 +21,27 @@ cache:
 install: |
   # Ensure NPM is latest
   # https://github.com/balupton/awesome-travis#ensure-npm-is-latest
-  export CURRENT_NPM_VERSION="$(npm --version)"
-  export LATEST_NPM_VERSION="$(npm view npm version)"
+  export CURRENT_NPM_VERSION="$(npm --version)" || exit -1
+  export LATEST_NPM_VERSION="$(npm view npm version)" || exit -1
   if test "$CURRENT_NPM_VERSION" != "$LATEST_NPM_VERSION"; then
     echo "running an old npm version, upgrading npm..."
-    npm install npm --global --cache-min=Infinity
+    npm install npm --global --cache-min=Infinity || exit -1
     echo "...npm upgrade complete"
   fi
   # Ensure dependencies install with a LTS node version
   # https://github.com/balupton/awesome-travis#use-lts-node-version-for-preparation
-  export CURRENT_NODE_VERSION="$(node --version)"
-  export LTS_NODE_VERSIONS="$(nvm ls-remote --lts)"
+  export CURRENT_NODE_VERSION="$(node --version)" || exit -1
+  export LTS_NODE_VERSIONS="$(nvm ls-remote --lts)" || exit -1
   if echo "$LTS_NODE_VERSIONS" | grep "$CURRENT_NODE_VERSION"; then
     echo "running on a LTS node version, completing setup..."
-    npm run our:setup
+    npm run our:setup || exit -1
     echo "...setup complete with current LTS version"
   else
     echo "running on a non-LTS node version, completing setup on a LTS node version..."
-    nvm install --lts
-    export LTS_NODE_INSTALLED_VERSION="$(node --version)"
-    npm run our:setup
-    nvm use "$TRAVIS_NODE_VERSION"
+    nvm install --lts || exit -1
+    export LTS_NODE_INSTALLED_VERSION="$(node --version)" || exit -1
+    npm run our:setup || exit -1
+    nvm use "$TRAVIS_NODE_VERSION" || exit -1
     echo "...setup complete with LTS"
   fi
 
@@ -51,13 +51,13 @@ before_script: |
   # https://github.com/balupton/awesome-travis#use-lts-node-version-for-preparation
   if test "$LTS_NODE_INSTALLED_VERSION"; then
     echo "running on a non-LTS node version, compiling with LTS, skipping linting..."
-    nvm use "$LTS_NODE_INSTALLED_VERSION"
-    npm run our:compile
-    nvm use "$TRAVIS_NODE_VERSION"
+    nvm use "$LTS_NODE_INSTALLED_VERSION" || exit -1
+    npm run our:compile || exit -1
+    nvm use "$TRAVIS_NODE_VERSION" || exit -1
     echo "...compiled"
   else
     echo "running on a LTS node version, compiling and linting..."
-    npm run our:compile && npm run our:verify
+    npm run our:compile && npm run our:verify || exit -1
     echo "...compiled and linted"
   fi
 
@@ -69,7 +69,7 @@ after_success: |
   if test "$CURRENT_NODE_VERSION" = "$LTS_NODE_LATEST_VERSION"; then
     if test "$TRAVIS_TAG"; then
       echo "deploying..."
-      npm run deploy
+      npm run deploy || exit -1
       echo "...deployed"
     else
       echo "non-tag, no need for deploy"
