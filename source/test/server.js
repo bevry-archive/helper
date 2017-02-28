@@ -54,6 +54,7 @@ joe.suite('server', function (suite, test) {
 	test('should send 404 correctly', function (done) {
 		const url = `${serverURL}`
 		request.get(url).end(function (error, res) {
+			assert.errorEqual(error, null, 'error')
 			assert.equal(res.statusCode, HTTP_NOT_FOUND, 'status code')
 			assert.deepEqual(res.body, { success: false, error: '404 Not Found' }, 'body')
 			done()
@@ -63,6 +64,7 @@ joe.suite('server', function (suite, test) {
 	test('should send errors correctly', function (done) {
 		const url = `${serverURL}?method=error`
 		request.get(url).end(function (error, res) {
+			assert.errorEqual(error, null, 'error')
 			assert.equal(res.statusCode, HTTP_BAD_REQUEST, 'status code')
 			assert.deepEqual(res.body, { success: false, error: 'the error', someData: 123 }, 'body')
 			done()
@@ -72,6 +74,7 @@ joe.suite('server', function (suite, test) {
 	test('should send success correctly', function (done) {
 		const url = `${serverURL}?method=success`
 		request.get(url).end(function (error, res) {
+			assert.errorEqual(error, null, 'error')
 			assert.equal(res.statusCode, HTTP_OK, 'status code')
 			assert.deepEqual(res.body, { success: true, someData: 123 }, 'body')
 			done()
@@ -81,6 +84,7 @@ joe.suite('server', function (suite, test) {
 	test('should send response correctly', function (done) {
 		const url = `${serverURL}?method=response`
 		request.get(url).end(function (error, res) {
+			assert.errorEqual(error, null, 'error')
 			assert.equal(res.statusCode, HTTP_OK, 'status code')
 			assert.deepEqual(res.body, { someData: 123 }, 'body')
 			done()

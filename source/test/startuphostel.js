@@ -28,6 +28,7 @@ joe.suite('startuphostel-helper', function (suite, test) {
 	test('should send 404 correctly', function (done) {
 		const url = `${serverURL}`
 		superagent.get(url).end(function (error, res) {
+			assert.errorEqual(error, null, 'error')
 			assert.equal(res.statusCode, HTTP_NOT_FOUND, 'status code')
 			assert.deepEqual(res.body, { success: false, error: '404 Not Found' }, 'body')
 			done()
@@ -37,6 +38,7 @@ joe.suite('startuphostel-helper', function (suite, test) {
 	test('should fetch the data correctly', function (done) {
 		const url = `${serverURL}?method=startuphostel-people&key=${process.env.SH_API_KEY}`
 		superagent.get(url).redirects(2).end(function (error, res) {
+			assert.errorEqual(error, null, 'error')
 			assert.equal(res.statusCode, HTTP_OK, 'status code')
 			assert.equal(res.body.people.length > 10, true, 'should have returned more than 10 people')
 			done()

@@ -27,6 +27,7 @@ joe.suite('contributors-helper', function (suite, test) {
 	test('should fetch contributors correctly', function (done) {
 		const url = `${serverURL}?method=contributors&users=browserstate`
 		superagent.get(url).end(function (error, res) {
+			assert.errorEqual(error, null, 'error')
 			assert.equal(res.statusCode, HTTP_OK, 'status code')
 			assert.equal(JSON.parse(res.text).success, true, 'latest contributors were successfully fetched')
 			done()
