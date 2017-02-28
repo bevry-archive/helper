@@ -12,24 +12,17 @@ const HTTP_OK = 200
 
 // Task
 joe.suite('startuphostel-helper', function (suite, test) {
-	let serverURL, server, app
+	let app, serverURL
 
-	suite('app', function (suite, test) {
-		test('create', function () {
-			app = require('../lib/app').create()
-		})
-		test('setup', function (complete) {
-			app.setup({}, complete)
-		})
-		test('listen', function (complete) {
-			app.listen({middlewares: [require('../lib/startuphostel')]}, function (err, _connect, _server) {
-				if ( err )  return complete(err)
-				server = _server
-				const address = server.address()
-				serverURL = `http://${address.address}:${address.port}`
-				complete()
+	test('app', function (done) {
+		app = require('../app')
+			.create({plugins: ['app', 'bevry', 'startuphostel']})
+			.start(function (err) {
+				if ( err )  return done(err)
+				serverURL = app.state.app.serverURL
+				console.log(`testing server listing on ${serverURL}`)
+				done()
 			})
-		})
 	})
 
 	test('should send 404 correctly', function (done) {
@@ -51,7 +44,7 @@ joe.suite('startuphostel-helper', function (suite, test) {
 	})
 
 	test('should shutdown server correctly', function (done) {
-		app.destroy({}, done)
+		app.stop({}, done)
 	})
 
 })

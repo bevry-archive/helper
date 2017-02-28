@@ -4,6 +4,7 @@
 // Import
 const extendr = require('extendr')
 const urlUtil = require('url')
+const extractOpts = require('extract-opts')
 
 // Prepare
 const PORT_DEFAULT = 8000
@@ -32,9 +33,7 @@ module.exports = class Server {
 
 	start (opts, next) {
 		// Prepare
-		const _opts = require('extract-opts')(opts, next)
-		opts = _opts[0]
-		next = _opts[1]
+		[opts, next] = extractOpts(opts, next)
 
 		// Initialise libraries
 		const connect = require('connect')()
@@ -62,6 +61,7 @@ module.exports = class Server {
 		if ( opts.middleware ) {
 			connect.use(opts.middleware)
 		}
+		this.log('info', `adding ${(opts.middlewares || []).length} middlewares`)
 		if ( Array.isArray(opts.middlewares) ) {
 			opts.middlewares.forEach(function (middleware) {
 				connect.use(function (req, res, next) {
@@ -82,7 +82,7 @@ module.exports = class Server {
 
 		// Start our server
 		const server = connect.listen(opts.port, opts.hostname, () => {
-			this.log('info', 'Opened server on', opts.port, opts.hostname)
+			this.log('info', 'opened server on', opts.port, opts.hostname)
 			if ( next )  return next(null, connect, server)
 		})
 		this.server = server
@@ -92,6 +92,7 @@ module.exports = class Server {
 	}
 
 	destroy (opts, next) {
+		[opts, next] = extractOpts(opts, next)
 		this.server.close(next)
 		return this
 	}

@@ -21,6 +21,10 @@ const env = {
 	startuphostel: {
 		campaignMonitorListId: 'SH_CM_LIST_ID',
 		apiKey: 'SH_API_KEY'
+	},
+	contributors: {
+		githubClientId: 'GITHUB_CLIENT_ID',
+		githubClientSecret: 'GITHUB_CLIENT_SECRET'
 	}
 }
 

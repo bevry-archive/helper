@@ -1,18 +1,35 @@
 'use strict'
 
 // Imports
-const Person = require('./person')
+const Analytics = require('analytics-node')
+const PluginClerk = require('pluginclerk')
 const semver = require('semver')
-const env = require('./env')
-const state = require('./state')
+const env = require('../env')
 
 // Prepare
 const HTTP_REDIRECT_PERMANENT = 301
 // const HTTP_REDIRECT_TEMPORARY = 302
 
+// Init
+function initAnalytics () {
+	const {state, log} = this
+	log('info', 'init docpad analytics')
+	state.docpad.analytics = new Analytics(env.docpad.segmentKey)
+}
+function initClerk () {
+	const {state, log} = this
+	log('info', 'init docpad plugin clerk')
+	state.docpad.pluginClerk = new PluginClerk({
+		log,
+		keyword: 'docpad-plugin',
+		prefix: 'docpad-plugin-'
+	})
+}
+
 // Middleware
-module.exports = function middleware (req, res, next) {
+function middleware (req, res, next) {
 	// Prepare
+	const {state} = this
 	const log = res.log
 	const ipAddress = req.headers['X-Forwarded-For'] || req.connection.remoteAddress
 
@@ -76,16 +93,12 @@ module.exports = function middleware (req, res, next) {
 					dependencies: req.body.dependencies
 				}
 
-				// Wait for ready
-				state.app.ready({name: 'docpad plugin'}, function (err) {
-					if ( err )  return res.sendError(err)
-					// Ready
-					log('debug', 'fetching docpad plugin...')
-					state.docpad.pluginClerk.fetchPlugin(clerkOptions, function (err, result) {
-						log('debug', 'fetched docpad plugin')
-						if ( err )  return res.sendError(err, clerkOptions)
-						res.sendSuccess(result)
-					})
+				// Ready
+				log('debug', 'fetching docpad plugin...')
+				state.docpad.pluginClerk.fetchPlugin(clerkOptions, function (err, result) {
+					log('debug', 'fetched docpad plugin')
+					if ( err )  return res.sendError(err, clerkOptions)
+					res.sendSuccess(result)
 				})
 				break
 
@@ -94,16 +107,13 @@ module.exports = function middleware (req, res, next) {
 				clerkOptions = {
 					dependencies: req.body.dependencies
 				}
-				// Wait for ready
-				state.app.ready({name: 'docpad plugins'}, function (err) {
-					if ( err )  return res.sendError(err)
-					// Ready
-					log('debug', 'fetching docpad plugins...')
-					state.docpad.pluginClerk.fetchPlugins(clerkOptions, function (err, result) {
-						log('debug', 'fetched docpad plugins')
-						if ( err )  return res.sendError(err, clerkOptions)
-						res.sendSuccess(result)
-					})
+
+				// Ready
+				log('debug', 'fetching docpad plugins...')
+				state.docpad.pluginClerk.fetchPlugins(clerkOptions, function (err, result) {
+					log('debug', 'fetched docpad plugins')
+					if ( err )  return res.sendError(err, clerkOptions)
+					res.sendSuccess(result)
 				})
 				break
 
@@ -121,7 +131,7 @@ module.exports = function middleware (req, res, next) {
 
 			// Create the subscriber
 			case 'add-subscriber': {
-				const person = Person.ensure({
+				const person = state.bevry.Person.ensure({
 					email: req.query.email || req.body.email,
 					profileName: req.query.name || req.body.name || null,
 					docpadUser: true
@@ -130,16 +140,13 @@ module.exports = function middleware (req, res, next) {
 				const opts = {
 					campaignMonitorListId: env.docpad.campaignMonitorListId
 				}
-				// Wait for ready
-				state.app.ready({name: 'docpad subscriber'}, function (err) {
-					if ( err )  return res.sendError(err)
-					// Ready
-					person.subscribe(opts, function (err) {
+
+				// Ready
+				person.subscribe(opts, function (err) {
+					if ( err )  return res.sendError(err.message, {email: person.email})
+					person.save({}, function (err) {
 						if ( err )  return res.sendError(err.message, {email: person.email})
-						person.save({}, function (err) {
-							if ( err )  return res.sendError(err.message, {email: person.email})
-							return res.sendSuccess({email: person.email})
-						})
+						return res.sendSuccess({email: person.email})
 					})
 				})
 				break
@@ -167,34 +174,28 @@ module.exports = function middleware (req, res, next) {
 				req.body.context = req.body.context || {}
 				req.body.context.ip = req.body.context.ip || ipAddress
 
-				// Wait for ready
-				state.app.ready({name: 'docpad analytics'}, function (err) {
-					if ( err )  return res.sendError(err)
-					// Ready
+				// Action
+				switch ( req.query.action ) {
+					case 'identify':
+						// do this in the background, send success right away and thus log error instead of sending it
+						state.docpad.analytics.identify(req.body, function (err) {
+							if (err)  res.log('error', err)
+						})
+						break
 
-					// Action
-					switch ( req.query.action ) {
-						case 'identify':
-							// do this in the background, send success right away and thus log error instead of sending it
-							state.docpad.analytics.identify(req.body, function (err) {
-								if (err)  res.log('error', err)
-							})
-							break
+					case 'track':
+						// do this in the background, send success right away and thus log error instead of sending it
+						state.docpad.analytics.track(req.body, function (err) {
+							if (err)  res.log('error', err)
+						})
+						break
 
-						case 'track':
-							// do this in the background, send success right away and thus log error instead of sending it
-							state.docpad.analytics.track(req.body, function (err) {
-								if (err)  res.log('error', err)
-							})
-							break
+					default:
+						return res.sendError(new Error('unknown action'))
+				}
 
-						default:
-							return res.sendError(new Error('unknown action'))
-					}
-
-					// Send response back to client
-					res.sendSuccess()
-				})
+				// Send response back to client
+				res.sendSuccess()
 				break
 
 			default:
@@ -209,4 +210,16 @@ module.exports = function middleware (req, res, next) {
 		// Forward onto the next helper
 		next()
 	}
+}
+
+// Register
+module.exports = function () {
+	this.state.docpad = {
+		analytics: null
+	}
+	this.on('init', initAnalytics)
+	this.on('init', initClerk)
+	this.on('init', () => {
+		this.state.app.middlewares.push(middleware.bind(this))
+	})
 }

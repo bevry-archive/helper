@@ -65,6 +65,8 @@ handle DP_SEGMENT_KEY
 handle SH_CM_LIST_ID
 handle SH_API_KEY
 handle NOW_TOKEN
+handle GITHUB_CLIENT_ID
+handle GITHUB_CLIENT_SECRET
 
 
 if test "yes" = "$admin"; then

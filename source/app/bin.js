@@ -2,10 +2,8 @@
 'use strict'
 
 const EXIT_ERROR_CODE = 1
-const app = require('../lib/app').create()
 
-// Start our application server
-app.start({}, function (err) {
+const app = require('../../').create().start(function (err) {
 	if ( err ) {
 		console.error(err.stack)
 		process.exit(EXIT_ERROR_CODE)

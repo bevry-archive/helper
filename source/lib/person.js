@@ -5,10 +5,12 @@ const uuid = require('uuid')
 const superagent = require('superagent')
 const extendr = require('extendr')
 const eachr = require('eachr')
-const env = require('./env')
-const state = require('./state')
+const Cachely = require('cachely')
+const {TaskGroup} = require('TaskGroup')
+const Fellow = require('fellow')
+const env = require('../env')
 
-module.exports = class Person extends require('fellow') {
+module.exports = class Person extends Fellow {
 
 	constructor (...args) {
 		super(...args)
@@ -121,6 +123,9 @@ module.exports = class Person extends require('fellow') {
 	}
 
 	save (opts, next) {
+		const model = this.model
+		const {log, database} = model
+
 		const filter = {
 			uuid: this.uuid
 		}
@@ -131,11 +136,10 @@ module.exports = class Person extends require('fellow') {
 			upsert: true
 		}
 
-		state.app.log('debug', `Saving ${this.displayName} to database...`)
-		state.app.db.collection('users').updateOne(filter, update, options, (err, response) => {
+		log('debug', `Saving ${this.displayName} to database...`)
+		database.collection('users').updateOne(filter, update, options, (err, response) => {
 			if ( err )  return next(err)
-			state.app.log('debug', `Saved ${this.displayName} to database`, response.result)
-			// console.log(result)
+			log('debug', `Saved ${this.displayName} to database`, response.result)
 			next()
 		})
 	}
@@ -159,11 +163,13 @@ module.exports = class Person extends require('fellow') {
 	}
 
 	static loadFromDatabase (opts, next) {
-		state.app.log('debug', 'Fetching database data...')
-		state.app.db.collection('users').find({}).toArray((err, result) => {
+		const model = this
+		const {log, database} = model
+		log('debug', 'Fetching database data...')
+		database.collection('users').find({}).toArray((err, result) => {
 			if ( err )  return next(err)
-			state.app.log('debug', 'Fetched database data')
-			Person.add(result)
+			log('debug', 'Fetched database data')
+			this.add(result)
 			next()
 		})
 
@@ -172,6 +178,9 @@ module.exports = class Person extends require('fellow') {
 	}
 
 	static loadFromCsv ({path, data = {}}, next) {
+		const model = this
+		const {log} = model
+
 		const csv = require('csv')
 		const fsUtil = require('safefs')
 		const fields = {
@@ -185,16 +194,16 @@ module.exports = class Person extends require('fellow') {
 			bio: 'Bio'
 		}
 
-		state.app.log('debug', 'Fetching CSV data...')
-		fsUtil.readFile(path, function (err, fileData) {
+		log('debug', 'Fetching CSV data...')
+		fsUtil.readFile(path, (err, fileData) => {
 			if ( err )  return next(err)
 			const csvOptions = {
 				columns: true
 			}
-			csv.parse(fileData.toString(), csvOptions, function (err, results) {
+			csv.parse(fileData.toString(), csvOptions, (err, results) => {
 				if ( err )  return next(err)
 
-				state.app.log('debug', 'Fetched CSV data')
+				log('debug', 'Fetched CSV data')
 
 				for ( const result of results ) {
 					const personData = {}
@@ -204,7 +213,7 @@ module.exports = class Person extends require('fellow') {
 					})
 					delete result.Avatar
 					personData.startupHostelSurvey = result
-					Person.ensure(extendr.extend(personData, data)).addSource('startuphostel-csv')
+					model.ensure(extendr.extend(personData, data)).addSource('startuphostel-csv')
 				}
 
 				next()
@@ -216,21 +225,23 @@ module.exports = class Person extends require('fellow') {
 	}
 
 	static loadFromCampaignMonitor ({campaignMonitorListId, data = {}}, next) {
-		state.app.log('debug', 'Fetching campaign monitor data...')
+		const model = this
+		const {log} = model
+		log('debug', 'Fetching campaign monitor data...')
 
 		superagent
 			.get(`https://api.createsend.com/api/v3.1/lists/${campaignMonitorListId}/active.json`)
 			.accept('json')
 			.auth(env.bevry.campaignMonitorKey, 'x')
-			.end(function (err, dataResponse) {
+			.end((err, dataResponse) => {
 				if ( err ) {
 					return next(new Error('Request for Campaign Monitor data has failed with error:\n' + err.stack))
 				}
 
-				state.app.log('debug', 'Fetched campaign monitor data')
+				log('debug', 'Fetched campaign monitor data')
 
 				for ( const result of dataResponse.body.Results ) {
-					Person.ensure(extendr.extend({
+					model.ensure(extendr.extend({
 						email: result.EmailAddress,
 						profileName: result.Name
 					}, data)).addSource(`campaign-monitor-${campaignMonitorListId}`)
@@ -252,9 +263,12 @@ module.exports = class Person extends require('fellow') {
 	}
 
 	static loadFromTwitter ({twitterUsername, data = {}}, next) {
+		const model = this
+		const {log, twitterClient} = model
+
 		/* eslint camelcase:0 */
-		state.app.log('debug', 'Fetching twitter data...', twitterUsername)
-		state.app.twitterClient.get('followers/list', {screen_name: twitterUsername}, function (err, data) {
+		log('debug', 'Fetching twitter data...', twitterUsername)
+		twitterClient.get('followers/list', {screen_name: twitterUsername}, (err, data) => {
 			if (err) {
 				return next(new Error(
 					'Request for Twitter data has failed with error:\n' + err.stack
@@ -268,10 +282,10 @@ module.exports = class Person extends require('fellow') {
 				))
 			}
 
-			state.app.log('debug', 'Fetched twitter data', twitterUsername)
+			log('debug', 'Fetched twitter data', twitterUsername)
 
 			for ( const result of data.users ) {
-				Person.ensure(extendr.extend({
+				model.ensure(extendr.extend({
 					twitterId: result.id,
 					twitterName: result.name,
 					twitterUsername: result.screen_name,
@@ -286,6 +300,119 @@ module.exports = class Person extends require('fellow') {
 		})
 
 		// Chain
+		return this
+	}
+
+	static fetch (next) {
+		const model = this
+		const {log} = model
+		model.fetchCachely = model.fetchCachely || Cachely.create({log, method: (next) => {
+			// Prepare
+			const tasks = TaskGroup.create().done(function (err) {
+				if ( err )  return next(err)
+				next(null, 'fetched')
+			})
+
+			// Tasks
+			tasks.addTask('load people from the database', function (complete) {
+				log('info', 'Loading people from the database...')
+				model.loadFromDatabase({}, function (err) {
+					if ( err )  return complete(err)
+					log('info', 'Loaded people from the database...')
+					complete()
+				})
+			})
+
+			/*
+			tasks.addTask('load people from the CSV file', function (complete) {
+				log('info', 'Loading people from the CSV file...')
+				const opts = {
+					path: '/Users/balupton/startup-hostel-people.csv',
+					data: {
+						startupHostelUser: true
+					}
+				}
+				model.loadFromCsv(opts, function (err) {
+					if ( err )  return complete(err)
+					log('info', 'Loaded people from the CSV file...')
+					complete()
+				})
+			})
+			*/
+
+			// Load people from twitter
+			function twitterTask (opts) {
+				return function (complete) {
+					log('info', 'Loading people from twitter...')
+					model.loadFromTwitter(opts, function (err) {
+						if ( err )  return complete(err)
+						log('info', 'Loaded people from twitter')
+						complete()
+					})
+				}
+			}
+			tasks.addTask('load startuphostel twitter followers', twitterTask({
+				twitterUsername: 'StartupHostel',
+				data: {
+					startupHostelUser: true
+				}
+			}))
+			tasks.addTask('load docpad twitter followers', twitterTask({
+				twitterUsername: 'DocPad',
+				data: {
+					docpadUser: true
+				}
+			}))
+			tasks.addTask('load bevry twitter followers', twitterTask({
+				twitterUsername: 'BevryMe',
+				data: {}
+			}))
+
+			// Load people from campaign monitor
+			function subscriberTask (opts) {
+				return function (complete) {
+					log('info', 'Loading people from campaign monitor...')
+					model.loadFromCampaignMonitor(opts, function (err) {
+						if ( err )  return complete(err)
+						log('info', 'Loaded people from campaign monitor')
+						complete()
+					})
+				}
+			}
+			tasks.addTask('load startuphostel subscribers', subscriberTask({
+				campaignMonitorListId: env.startuphostel.campaignMonitorListId,
+				data: {
+					startupHostelUser: true
+				}
+			}))
+			tasks.addTask('load docpad subscribers', subscriberTask({
+				campaignMonitorListId: env.docpad.campaignMonitorListId,
+				data: {
+					docpadUser: true
+				}
+			}))
+
+			/*
+			// Log who our people are
+			tasks.addTask('log', function () {
+				require('assert-helpers').log(Person.list)
+			})
+			*/
+
+			// Update them
+			tasks.addGroup('save', function (addGroup, addTask) {
+				this.setConfig({concurrency: 0})
+				model.list.forEach(function (person) {
+					addTask(`Saving: ${person.displayName}`, function (complete) {
+						person.save({}, complete)
+					})
+				})
+			})
+
+			// Start
+			tasks.run()
+		}})
+		model.fetchCachely.request(next)
 		return this
 	}
 
