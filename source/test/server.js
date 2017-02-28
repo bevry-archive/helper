@@ -64,7 +64,7 @@ joe.suite('server', function (suite, test) {
 	test('should send errors correctly', function (done) {
 		const url = `${serverURL}?method=error`
 		request.get(url).end(function (error, res) {
-			assert.errorEqual(error, null, 'error')
+			assert.errorEqual(error, 'Bad Request', 'error')
 			assert.equal(res.statusCode, HTTP_BAD_REQUEST, 'status code')
 			assert.deepEqual(res.body, { success: false, error: 'the error', someData: 123 }, 'body')
 			done()
