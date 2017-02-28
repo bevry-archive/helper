@@ -60,8 +60,7 @@
   "scripts": {
     "our:setup": "chmod +x ./scripts/*.sh && npm install",
     "our:clean": "rm -Rf ./docs ./es2015",
-    "our:compile": "npm run our:compile:es2015",
-    "our:compile:es2015": "babel ./source --out-dir ./es2015 --presets es2015",
+    "our:compile": "echo 'no need for compile'",
     "our:meta": "npm run our:meta:projectz",
     "our:meta:projectz": "projectz compile",
     "our:verify": "npm run our:verify:eslint",
@@ -76,7 +75,8 @@
     "our:release:push": "git push origin master && git push origin --tags",
     "test": "node --harmony ./source/test/index.js --joe-reporter=console",
     "start": "node --harmony ./source/app/index.js",
-    "deploy": "./scripts/env.sh && now -C -E ./.env -n bevry-helper",
+    "deploy": "echo 'no need for deployment'",
+    "deploy:now": "now -C -E ./.env -n bevry-helper",
     "configure": "./scripts/env.sh",
     "configure:admin": "./scripts/env.sh admin"
   },

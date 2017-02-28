@@ -63,19 +63,19 @@ before_script: |
 
 
 after_success: |
-  # Release to Now
+  # Deployment
   export CURRENT_NODE_VERSION="$(node --version)"
   export LTS_NODE_LATEST_VERSION="$(nvm version-remote --lts)"
   if test "$CURRENT_NODE_VERSION" = "$LTS_NODE_LATEST_VERSION"; then
     if test "$TRAVIS_TAG"; then
-      echo "Releasing to now..."
+      echo "deploying..."
       npm run deploy
-      echo "...released to now"
+      echo "...deployed"
     else
-      echo "non-tag, no need for release to now"
+      echo "non-tag, no need for deploy"
     fi
   else
-    echo "running on non-latest LTS node version, skipping release"
+    echo "running on non-latest LTS node version, skipping deploy"
   fi
 
 
