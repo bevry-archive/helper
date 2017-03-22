@@ -85,7 +85,7 @@ function middleware (req, res, next) {
 					}
 					else {
 						branch = 'docpad-6.x'
-						extension = 'cson'
+						extension = 'json'
 					}
 				}
 				else {
