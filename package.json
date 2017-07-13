@@ -54,7 +54,7 @@
     "url": "http://github.com/bevry/helper.git"
   },
   "engines": {
-    "node": "6"
+    "node": "8"
   },
   "main": "source/app/index.js",
   "scripts": {
