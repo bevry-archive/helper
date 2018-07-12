@@ -1,5 +1,9 @@
 # History
 
+## v3.3.0 2018 July 12
+- Trimmed everything that wasn't used, perhaps useful to go back to the diff and add it later, or bask in its glory from time to time, but for now, it is not necessary, as we never used that data
+- Updated dependencies
+
 ## v3.2.1 2017 February 27
 - Re-added heroku support as it seems now.sh is not ready
 

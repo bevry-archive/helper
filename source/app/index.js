@@ -27,7 +27,7 @@ module.exports = class App extends EventEmitterGrouped {
 		this.stop = this.stop.bind(this)
 
 		const pluginsPath = opts.pluginsPath || pathUtil.join(__dirname, '..', 'plugins')
-		const plugins = opts.plugins || ['app', 'contributors', 'bevry', 'docpad', 'startuphostel']
+		const plugins = opts.plugins || ['app', 'docpad', 'contributors']
 
 		plugins.forEach((plugin) => {
 			require(pathUtil.join(pluginsPath, plugin)).call(this)
@@ -42,7 +42,7 @@ module.exports = class App extends EventEmitterGrouped {
 	start (opts, next) {
 		[opts, next] = extractOpts(opts, next)
 		this.emitSerial('init', function (err) {
-			if ( err )  return next(err)
+			if (err) return next(err)
 
 			return next()
 		})
@@ -53,7 +53,7 @@ module.exports = class App extends EventEmitterGrouped {
 	stop (opts, next) {
 		[opts, next] = extractOpts(opts, next)
 		this.emitSerial('deinit', function (err) {
-			if ( err )  return next(err)
+			if (err) return next(err)
 
 			return next()
 		})

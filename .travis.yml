@@ -10,7 +10,7 @@ sudo: false
 # https://github.com/balupton/awesome-travis#complete-nodejs-version-matrix
 language: node_js
 node_js:
-  - "6"     # lts
+  - "8"     # lts
 matrix:
   fast_finish: true
 cache:

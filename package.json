@@ -2,7 +2,7 @@
   "title": "Bevry Helper Service",
   "name": "bevry-helper-service",
   "private": true,
-  "version": "3.2.1",
+  "version": "3.3.0",
   "description": "A helper service that assists many of the bevry eco-system functions",
   "homepage": "https://github.com/bevry/helper",
   "license": "MIT",
@@ -81,9 +81,7 @@
     "configure:admin": "./scripts/env.sh admin"
   },
   "dependencies": {
-    "analytics-node": "^2.1.1",
     "body-parser": "^1.16.1",
-    "cachely": "^1.1.0",
     "caterpillar": "^3.0.1",
     "caterpillar-filter": "^3.0.0",
     "caterpillar-human": "^3.0.0",
@@ -93,17 +91,11 @@
     "event-emitter-grouped": "^2.5.0",
     "extendr": "^3.2.2",
     "extract-opts": "^3.3.1",
-    "fellow": "^2.3.0",
     "getcontributors": "^1.4.5",
     "hostenv": "^1.0.5",
-    "mongodb": "^2.2.24",
-    "pluginclerk": "^1.2.0",
-    "safefs": "^4.1.0",
+    "pluginclerk": "^2.0.0",
     "semver": "^5.3.0",
-    "superagent": "^3.5.0",
-    "taskgroup": "^5.0.1",
-    "twit": "^2.2.5",
-    "uuid": "^3.0.1"
+    "superagent": "^3.5.0"
   },
   "devDependencies": {
     "assert-helpers": "^4.5.0",

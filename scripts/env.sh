@@ -44,11 +44,11 @@ function addToHeroku {
 }
 
 function handle {
-	check $1
-	addToEnvFile $1 $envfile
+	check "$1"
+	addToEnvFile "$1" "$envfile"
 	if test "yes" = "$admin"; then
-		addToTravis $1
-		addToHeroku $1
+		addToTravis "$1"
+		addToHeroku "$1"
 	fi
 	echo -e ""
 }

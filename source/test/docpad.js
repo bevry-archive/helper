@@ -16,9 +16,9 @@ joe.suite('docpad-helper', function (suite, test) {
 
 	test('app', function (done) {
 		app = require('../app')
-			.create({plugins: ['app', 'bevry', 'docpad']})
+			.create({ plugins: ['app', 'docpad'] })
 			.start(function (err) {
-				if ( err )  return done(err)
+				if (err) return done(err)
 				serverURL = app.state.app.serverURL
 				console.log(`testing server listing on ${serverURL}`)
 				done()
@@ -56,18 +56,6 @@ joe.suite('docpad-helper', function (suite, test) {
 		})
 	})
 
-	test('should add balupton correctly', function (done) {
-		const url = `${serverURL}?method=add-subscriber`
-		request.get(url).send({name: 'Benjamin Lupton', email: 'b@lupton.cc'}).redirects(2).end(function (error, res) {
-			assert.errorEqual(error, null, 'error')
-			assert.equal(res.statusCode, HTTP_OK, 'status code')
-			console.log(assert.inspect(res.body))
-			assert.equal(res.body.success, true, 'success is true')
-			assert.equal(res.body.email, 'b@lupton.cc', 'email is correct')
-			done()
-		})
-	})
-
 	test('should fetch skeletons correctly', function (done) {
 		const url = `${serverURL}?method=skeletons&version=6.78.1`
 		request.get(url).redirects(2).end(function (error, res) {
@@ -80,7 +68,7 @@ joe.suite('docpad-helper', function (suite, test) {
 
 	test('should fetch plugins correctly', function (done) {
 		const url = `${serverURL}?method=plugins`
-		request.get(url).redirects(2).end(function (error, res) {
+		request.get(url).end(function (error, res) {
 			assert.errorEqual(error, null, 'error')
 			assert.equal(res.statusCode, HTTP_OK, 'status code')
 			assert.equal(Object.keys(res.body.plugins).length > 100, true, 'should have returned more than 100 plugins')
